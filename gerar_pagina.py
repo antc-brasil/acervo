@@ -90,7 +90,7 @@ def main() -> None:
         if not any(padrao.match(l.strip()) for l in linhas):
             print(f"  sem Auditor(a) no campo Extra: {i['data'].get('title', i['key'])[:70]}")
         if i["data"]["itemType"] == "thesis" and not i["data"].get("thesisType"):
-            print(f"  Tese sem o campo Tipo (TCC, Dissertação ou Tese): {i['data'].get('title', i['key'])[:70]}")
+            print(f"  Tese sem o campo Tipo (ex.: Tese (Doutorado em Direito)): {i['data'].get('title', i['key'])[:70]}")
     print(f"{len(snapshot['items'])} obras, {len(snapshot['collections'])} coleções → {destino}")
 
 

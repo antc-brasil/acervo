@@ -199,14 +199,11 @@ function lerAuditores(extra) {
     .map(m => ({ nome: m[1].trim(), tribunal: m[2].trim() }));
 }
 
-/* Campo "Tipo" dos itens Tese: agrupa variações de preenchimento em TCC, Dissertação ou Tese
-   (ex.: "Tese (Doutorado em Direito)" → Tese; "Monografia de especialização" → TCC) */
+/* Campo "Tipo" dos itens Tese: a natureza da obra é o texto antes dos parênteses
+   ("Tese (Doutorado em Direito)" → Tese; "Monografia (Bacharelado em Direito)" → Monografia) */
 function nivelAcademico(tipo) {
-  const t = semAcento(tipo).trim();
-  if (/^(tcc|trabalho de conclusao|monografia)|especializa|graduacao/.test(t)) return "TCC";
-  if (/^dissert|mestrado/.test(t)) return "Dissertação";
-  if (/^tese|doutorado/.test(t)) return "Tese";
-  return t ? tipo.trim().charAt(0).toUpperCase() + tipo.trim().slice(1) : "Trabalho acadêmico";
+  const t = (tipo || "").split("(")[0].trim();
+  return t ? t.charAt(0).toLocaleUpperCase("pt-BR") + t.slice(1) : "Trabalho acadêmico";
 }
 
 /* Autor da referência que corresponde a um(a) Auditor(a) do campo Extra */
