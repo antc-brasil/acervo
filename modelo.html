@@ -175,13 +175,14 @@ const SNAPSHOT = /*__SNAPSHOT__*/{"items": [], "collections": [], "geradoEm": ""
 
 const TIPOS = {
   journalArticle: "Artigo de periódico", book: "Livro", bookSection: "Capítulo de livro",
-  thesis: "Tese / dissertação", conferencePaper: "Trabalho em evento", report: "Relatório",
+  conferencePaper: "Trabalho em evento", report: "Relatório",
   magazineArticle: "Artigo de revista", newspaperArticle: "Artigo de jornal",
   webpage: "Página web", blogPost: "Publicação em blog", presentation: "Apresentação",
   document: "Documento", encyclopediaArticle: "Verbete", manuscript: "Manuscrito"
 };
 const API = "https://api.zotero.org/groups/" + CONFIG.groupId;
-const ESTILO = "associacao-brasileira-de-normas-tecnicas";
+/* Universidade Federal do Rio Grande do Sul - ABNT (autoria completa) */
+const ESTILO = "associacao-brasileira-de-normas-tecnicas-ufrgs";
 const $ = (id) => document.getElementById(id);
 const semAcento = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
@@ -196,6 +197,16 @@ function lerAuditores(extra) {
     .map(l => l.trim().match(/^([^:()]+?)\s*\(([^():]+)\)$/))
     .filter(Boolean)
     .map(m => ({ nome: m[1].trim(), tribunal: m[2].trim() }));
+}
+
+/* Campo "Tipo" dos itens Tese: agrupa variações de preenchimento em TCC, Dissertação ou Tese
+   (ex.: "Tese (Doutorado em Direito)" → Tese; "Monografia de especialização" → TCC) */
+function nivelAcademico(tipo) {
+  const t = semAcento(tipo).trim();
+  if (/^(tcc|trabalho de conclusao|monografia)|especializa|graduacao/.test(t)) return "TCC";
+  if (/^dissert|mestrado/.test(t)) return "Dissertação";
+  if (/^tese|doutorado/.test(t)) return "Tese";
+  return t ? tipo.trim().charAt(0).toUpperCase() + tipo.trim().slice(1) : "Trabalho acadêmico";
 }
 
 /* Autor da referência que corresponde a um(a) Auditor(a) do campo Extra */
@@ -216,13 +227,13 @@ function normalizar(raw, colecoes) {
     const tags = (d.tags || []).map(t => t.tag).filter(t => !ignorar.has(semAcento(t)));
     const doi = (d.DOI || "").trim();
     let tipo = TIPOS[d.itemType] || d.itemType;
-    if (d.itemType === "thesis" && d.thesisType) tipo = d.thesisType.charAt(0).toUpperCase() + d.thesisType.slice(1);
+    if (d.itemType === "thesis") tipo = nivelAcademico(d.thesisType);
     const resumo = (d.abstractNote || "").trim();
     const aces = lerAuditores(d.extra);
-    /* Forma do nome na referência ABNT ("SOBRENOME, Prenome"), para destacá-la */
+    /* Formas do nome na referência ("SOBRENOME, I. dos S." ou "SOBRENOME, Prenome"), para destacá-las */
     const destaques = (d.creators || [])
       .filter(c => aces.some(a => ehAuditor(c, a.nome)))
-      .map(c => c.lastName.toLocaleUpperCase("pt-BR") + (c.firstName ? ", " + c.firstName : ""));
+      .flatMap(formasNaReferencia);
     return {
       key: it.key,
       tipo,
@@ -263,9 +274,21 @@ function refSegura(html) {
   return saida;
 }
 
+/* Formas do autor na referência: por extenso ("VIANA, Ismar dos Santos", estilos de autoria
+   completa) ou abreviada ("VIANA, I. dos S.": iniciais, partículas minúsculas por extenso) */
+function formasNaReferencia(c) {
+  const sobrenome = c.lastName.toLocaleUpperCase("pt-BR");
+  if (!c.firstName) return [sobrenome];
+  const iniciais = c.firstName.trim().split(/\s+/)
+    .map(p => /^\p{Ll}/u.test(p) ? p : p.split("-").map(x => x.charAt(0) + ".").join("-"))
+    .join(" ");
+  return [sobrenome + ", " + iniciais, sobrenome + ", " + c.firstName.trim()];
+}
+
 /* Marca, no texto da referência, os autores que são Auditores de Controle Externo */
 function destacar(ref, nomes) {
   nomes.forEach(nome => {
+    if ([...ref.querySelectorAll("mark")].some(m => m.textContent === nome)) return;
     const andar = document.createTreeWalker(ref, NodeFilter.SHOW_TEXT);
     for (let n = andar.nextNode(); n; n = andar.nextNode()) {
       const i = n.textContent.indexOf(nome);
@@ -279,6 +302,28 @@ function destacar(ref, nomes) {
       break;
     }
   });
+}
+
+/* "Acesso em" deve ser a data de quem cita, não a da curadoria: na cópia, vira a data de hoje */
+const MESES = ["jan.", "fev.", "mar.", "abr.", "maio", "jun.", "jul.", "ago.", "set.", "out.", "nov.", "dez."];
+function comAcessoHoje(txt) {
+  const h = new Date();
+  const hoje = `${h.getDate()} ${MESES[h.getMonth()]} ${h.getFullYear()}`;
+  return txt.replace(/Acesso em: \d{1,2}º? \p{L}+\.? \d{4}/u, "Acesso em: " + hoje);
+}
+
+/* Alternativa quando o navegador recusa a área de transferência */
+function copiarPorSelecao(txt, junto) {
+  const caixa = document.createElement("textarea");
+  caixa.value = txt; caixa.readOnly = true; caixa.rows = 3;
+  caixa.style.cssText = "width:100%;font:inherit;font-size:.85rem;margin-top:8px";
+  junto.after(caixa);
+  caixa.select();
+  let ok = false;
+  try { ok = document.execCommand("copy"); } catch {}
+  if (ok) caixa.remove();
+  else setTimeout(() => caixa.remove(), 30000);
+  return ok;
 }
 
 function preencherSelect(sel, valores) {
@@ -416,11 +461,14 @@ function render() {
     const copiar = document.createElement("button");
     copiar.type = "button";
     copiar.textContent = "Copiar referência (ABNT)";
+    copiar.title = "A data de acesso é atualizada para hoje na cópia";
     copiar.onclick = async () => {
-      const txt = li.querySelector(".ref").textContent.trim();
-      try { await navigator.clipboard.writeText(txt); copiar.textContent = "Copiada"; }
-      catch { getSelection().selectAllChildren(li.querySelector(".ref")); copiar.textContent = "Referência selecionada: use Ctrl+C"; }
-      setTimeout(() => (copiar.textContent = "Copiar referência (ABNT)"), 2000);
+      const txt = comAcessoHoje(li.querySelector(".ref").textContent.trim());
+      let ok = false;
+      try { await navigator.clipboard.writeText(txt); ok = true; }
+      catch { ok = copiarPorSelecao(txt, links); }
+      copiar.textContent = ok ? "Copiada" : "Referência selecionada: use Ctrl+C";
+      setTimeout(() => (copiar.textContent = "Copiar referência (ABNT)"), ok ? 2000 : 6000);
     };
     links.appendChild(copiar);
     const z = document.createElement("a");
@@ -485,6 +533,8 @@ async function iniciar() {
   $("lnk-ris").href = `${API}/items/top?format=ris&limit=100`;
   [...FILTROS, "f-ordem"].forEach(id => $(id).addEventListener("input", atualizar));
   $("limpar").onclick = () => { FILTROS.forEach(id => ($(id).value = "")); atualizar(); };
+  /* Link com filtro aberto na mesma aba (só o "#…" muda): reaplica o filtro */
+  window.addEventListener("hashchange", () => { lerEstado(); render(); });
 
   const snap = SNAPSHOT.items.length;
   if (snap) carregar(SNAPSHOT.items, SNAPSHOT.collections, `Dados de ${SNAPSHOT.geradoEm}.`);

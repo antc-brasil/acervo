@@ -21,7 +21,8 @@ from pathlib import Path
 
 GROUP_ID = 6584175
 GROUP_URL = "https://www.zotero.org/groups/6584175/acervo_antc"
-ESTILO = "associacao-brasileira-de-normas-tecnicas"
+# Universidade Federal do Rio Grande do Sul - ABNT (autoria completa)
+ESTILO = "associacao-brasileira-de-normas-tecnicas-ufrgs"
 
 CONFIG = {
     "groupId": GROUP_ID,
@@ -88,6 +89,8 @@ def main() -> None:
         linhas = re.split(r"\n|;", i["data"].get("extra", ""))
         if not any(padrao.match(l.strip()) for l in linhas):
             print(f"  sem Auditor(a) no campo Extra: {i['data'].get('title', i['key'])[:70]}")
+        if i["data"]["itemType"] == "thesis" and not i["data"].get("thesisType"):
+            print(f"  Tese sem o campo Tipo (TCC, Dissertação ou Tese): {i['data'].get('title', i['key'])[:70]}")
     print(f"{len(snapshot['items'])} obras, {len(snapshot['collections'])} coleções → {destino}")
 
 
