@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repositório ANTC</title>
+<meta name="description" content="Produção bibliográfica de Auditores de Controle Externo dos Tribunais de Contas.">
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --text: #1d1f23;
+    --muted: #5d6470;
+    --line: #e2e0da;
+    --accent: #1f4e79;
+    --accent-soft: #e6eef6;
+    --focus: #2b6cb0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15171a;
+      --surface: #1d2024;
+      --text: #e8e6e1;
+      --muted: #a2a8b1;
+      --line: #30343a;
+      --accent: #8db8e0;
+      --accent-soft: #22303d;
+      --focus: #8db8e0;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 32px 16px 64px; }
+  header h1 { font-size: 1.75rem; line-height: 1.2; margin: 0 0 8px; }
+  header p { margin: 0 0 4px; color: var(--muted); max-width: 70ch; }
+  header .acoes { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .92rem; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid var(--focus); outline-offset: 2px;
+  }
+
+  .filtros {
+    margin: 28px 0 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .filtros label { min-width: 0; display: flex; flex-direction: column; gap: 4px; font-size: .8rem; color: var(--muted); }
+  input, select {
+    font: inherit; font-size: .95rem; color: var(--text);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+    padding: 8px 10px; min-width: 0; width: 100%;
+  }
+  @media (max-width: 720px) { .filtros { grid-template-columns: repeat(2, minmax(0, 1fr)); } .filtros .busca { grid-column: 1 / -1; } }
+
+  .status { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: .88rem; color: var(--muted); margin-bottom: 8px; }
+  .status button { font: inherit; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; text-decoration: underline; }
+
+  ol.lista { list-style: none; margin: 0; padding: 0; }
+  .item { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; margin-bottom: 12px; }
+  .meta { font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 6px; }
+  .ref { margin: 0; overflow-wrap: anywhere; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tag { font: inherit; font-size: .8rem; border: 0; border-radius: 999px; padding: 2px 10px; background: var(--accent-soft); color: var(--accent); cursor: pointer; }
+  .links { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: .88rem; align-items: center; }
+  .links button { font: inherit; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; text-decoration: underline; }
+  details { margin-top: 10px; font-size: .92rem; }
+  details summary { cursor: pointer; color: var(--muted); }
+  details p { margin: 8px 0 0; }
+  .vazio { text-align: center; color: var(--muted); padding: 40px 0; }
+  footer { margin-top: 32px; font-size: .82rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Repositório de Produção Bibliográfica</h1>
+    <p>Obras de autoria de Auditores de Controle Externo dos Tribunais de Contas do Brasil, reunidas pela ANTC para dar visibilidade ao conhecimento produzido pela carreira.</p>
+    <p>As referências apontam para o local de publicação original. O acesso ao texto completo segue as condições de cada editora ou periódico.</p>
+    <div class="acoes">
+      <a id="lnk-zotero" href="#" target="_blank" rel="noopener">Abrir a biblioteca no Zotero</a>
+      <a id="lnk-bibtex" href="#" download>Baixar tudo (BibTeX)</a>
+      <a id="lnk-ris" href="#" download>Baixar tudo (RIS)</a>
+    </div>
+  </header>
+
+  <div class="filtros" role="search">
+    <label class="busca">Buscar
+      <input id="f-busca" type="search" placeholder="Título, autor, assunto…" autocomplete="off">
+    </label>
+    <label>Tema
+      <select id="f-tema"><option value="">Todos</option></select>
+    </label>
+    <label>Tipo de obra
+      <select id="f-tipo"><option value="">Todos</option></select>
+    </label>
+    <label>Ordenar por
+      <select id="f-ordem">
+        <option value="ano">Mais recentes</option>
+        <option value="autor">Autor (A–Z)</option>
+        <option value="titulo">Título (A–Z)</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="status">
+    <span id="contagem" aria-live="polite"></span>
+    <button id="limpar" type="button" hidden>Limpar filtros</button>
+  </div>
+
+  <ol class="lista" id="lista"></ol>
+
+  <footer>
+    <span id="origem"></span>
+    Catálogo mantido no <a href="https://www.zotero.org" target="_blank" rel="noopener">Zotero</a>. Sugestões de inclusão: entre em contato com a ANTC.
+  </footer>
+</div>
+
+<script>
+/* Configuração — gerada por gerar_pagina.py */
+const CONFIG = /*__CONFIG__*/{};
+/* Cópia dos dados usada quando a consulta à API não estiver disponível */
+const SNAPSHOT = /*__SNAPSHOT__*/{"items": [], "collections": [], "geradoEm": ""};
+
+const TIPOS = {
+  journalArticle: "Artigo de periódico", book: "Livro", bookSection: "Capítulo de livro",
+  thesis: "Tese / dissertação", conferencePaper: "Trabalho em evento", report: "Relatório",
+  magazineArticle: "Artigo de revista", newspaperArticle: "Artigo de jornal",
+  webpage: "Página web", blogPost: "Publicação em blog", presentation: "Apresentação",
+  document: "Documento", encyclopediaArticle: "Verbete", manuscript: "Manuscrito"
+};
+const API = "https://api.zotero.org/groups/" + CONFIG.groupId;
+const ESTILO = "associacao-brasileira-de-normas-tecnicas";
+const $ = (id) => document.getElementById(id);
+const semAcento = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+let OBRAS = [];
+
+function normalizar(raw, colecoes) {
+  const nomesCol = Object.fromEntries(colecoes.map(c => [c.key, c.name]));
+  const ignorar = new Set((CONFIG.tagsIgnoradas || []).map(semAcento));
+  return raw.map(it => {
+    const d = it.data;
+    const autores = (d.creators || []).map(c => c.name || [c.lastName, c.firstName].filter(Boolean).join(", "));
+    const tags = (d.tags || []).map(t => t.tag).filter(t => !ignorar.has(semAcento(t)));
+    const doi = (d.DOI || "").trim();
+    let tipo = TIPOS[d.itemType] || d.itemType;
+    if (d.itemType === "thesis" && d.thesisType) tipo = d.thesisType.charAt(0).toUpperCase() + d.thesisType.slice(1);
+    const resumo = (d.abstractNote || "").trim();
+    return {
+      key: it.key,
+      tipo,
+      titulo: d.title || "",
+      autores,
+      ano: ((it.meta && it.meta.parsedDate) || "").slice(0, 4),
+      tags,
+      colecoes: (d.collections || []).map(k => nomesCol[k]).filter(Boolean),
+      resumo: CONFIG.ocultarResumosIA && /^\[resumo gerado por ia/i.test(resumo) ? "" : resumo,
+      texto: doi ? "https://doi.org/" + doi.replace(/^https?:\/\/(dx\.)?doi\.org\//, "") : (d.url || ""),
+      bib: it.bib || "",
+      zotero: CONFIG.groupUrl + "/items/" + it.key,
+      busca: semAcento([d.title, autores.join(" "), tags.join(" "), resumo, d.publicationTitle, d.bookTitle, d.university, d.publisher].join(" "))
+    };
+  });
+}
+
+/* Mantém só texto e ênfases da referência formatada pelo Zotero */
+function refSegura(html) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const alvo = doc.querySelector(".csl-entry") || doc.body;
+  const saida = document.createElement("p");
+  saida.className = "ref";
+  const permitidas = new Set(["B", "I", "EM", "STRONG", "SUP", "SUB"]);
+  (function copiar(origem, destino) {
+    origem.childNodes.forEach(n => {
+      if (n.nodeType === 3) destino.appendChild(document.createTextNode(n.textContent));
+      else if (n.nodeType === 1) {
+        const el = permitidas.has(n.tagName) ? document.createElement(n.tagName) : document.createDocumentFragment();
+        copiar(n, el);
+        destino.appendChild(el);
+      }
+    });
+  })(alvo, saida);
+  saida.normalize();
+  return saida;
+}
+
+function preencherSelect(sel, valores) {
+  const atual = sel.value;
+  sel.length = 1;
+  valores.forEach(v => sel.add(new Option(v, v)));
+  sel.value = valores.includes(atual) ? atual : "";
+}
+
+function montarFiltros() {
+  const temas = [...new Set(OBRAS.flatMap(o => o.tags))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  const tipos = [...new Set(OBRAS.map(o => o.tipo))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  preencherSelect($("f-tema"), temas);
+  preencherSelect($("f-tipo"), tipos);
+}
+
+function lerEstado() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  $("f-busca").value = p.get("q") || "";
+  $("f-tema").value = p.get("tema") || "";
+  $("f-tipo").value = p.get("tipo") || "";
+  $("f-ordem").value = p.get("ordem") || "ano";
+}
+
+function gravarEstado() {
+  const p = new URLSearchParams();
+  if ($("f-busca").value) p.set("q", $("f-busca").value);
+  if ($("f-tema").value) p.set("tema", $("f-tema").value);
+  if ($("f-tipo").value) p.set("tipo", $("f-tipo").value);
+  if ($("f-ordem").value !== "ano") p.set("ordem", $("f-ordem").value);
+  const h = p.toString();
+  history.replaceState(null, "", h ? "#" + h : location.pathname + location.search);
+}
+
+function render() {
+  const termos = semAcento($("f-busca").value).split(/\s+/).filter(Boolean);
+  const tema = $("f-tema").value, tipo = $("f-tipo").value, ordem = $("f-ordem").value;
+  const cmp = (a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" });
+  const filtradas = OBRAS
+    .filter(o => termos.every(t => o.busca.includes(t)))
+    .filter(o => !tema || o.tags.includes(tema))
+    .filter(o => !tipo || o.tipo === tipo)
+    .sort((a, b) =>
+      ordem === "autor" ? cmp(a.autores[0] || "", b.autores[0] || "") || cmp(a.titulo, b.titulo)
+      : ordem === "titulo" ? cmp(a.titulo, b.titulo)
+      : (b.ano || "0").localeCompare(a.ano || "0") || cmp(a.autores[0] || "", b.autores[0] || ""));
+
+  const lista = $("lista");
+  lista.replaceChildren();
+  filtradas.forEach(o => {
+    const li = document.createElement("li");
+    li.className = "item";
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = [o.tipo, o.ano].filter(Boolean).join(" · ");
+    li.appendChild(meta);
+
+    const ref = o.bib ? refSegura(o.bib) : null;
+    if (ref && ref.textContent.trim()) li.appendChild(ref);
+    else {
+      const p = document.createElement("p");
+      p.className = "ref";
+      p.textContent = [o.autores.join("; "), o.titulo, o.ano].filter(Boolean).join(". ") + ".";
+      li.appendChild(p);
+    }
+
+    if (o.tags.length) {
+      const tags = document.createElement("div");
+      tags.className = "tags";
+      o.tags.forEach(t => {
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "tag"; b.textContent = t;
+        b.title = "Filtrar pelo tema " + t;
+        b.onclick = () => { $("f-tema").value = t; atualizar(); window.scrollTo({ top: $("lista").offsetTop - 120, behavior: "smooth" }); };
+        tags.appendChild(b);
+      });
+      li.appendChild(tags);
+    }
+
+    if (o.resumo) {
+      const det = document.createElement("details");
+      const sum = document.createElement("summary");
+      sum.textContent = "Resumo";
+      const p = document.createElement("p");
+      p.textContent = o.resumo;
+      det.append(sum, p);
+      li.appendChild(det);
+    }
+
+    const links = document.createElement("div");
+    links.className = "links";
+    if (o.texto) {
+      const a = document.createElement("a");
+      a.href = o.texto; a.target = "_blank"; a.rel = "noopener";
+      a.textContent = "Acessar publicação";
+      links.appendChild(a);
+    }
+    const copiar = document.createElement("button");
+    copiar.type = "button";
+    copiar.textContent = "Copiar referência (ABNT)";
+    copiar.onclick = async () => {
+      const txt = li.querySelector(".ref").textContent.trim();
+      try { await navigator.clipboard.writeText(txt); copiar.textContent = "Copiada"; }
+      catch { copiar.textContent = "Não foi possível copiar"; }
+      setTimeout(() => (copiar.textContent = "Copiar referência (ABNT)"), 2000);
+    };
+    links.appendChild(copiar);
+    const z = document.createElement("a");
+    z.href = o.zotero; z.target = "_blank"; z.rel = "noopener";
+    z.textContent = "Ver no Zotero";
+    links.appendChild(z);
+    li.appendChild(links);
+
+    lista.appendChild(li);
+  });
+
+  if (!filtradas.length) {
+    const li = document.createElement("li");
+    li.className = "vazio";
+    li.textContent = OBRAS.length ? "Nenhuma obra encontrada com esses filtros." : "Carregando…";
+    lista.appendChild(li);
+  }
+  const n = filtradas.length;
+  $("contagem").textContent = n === OBRAS.length
+    ? `${n} ${n === 1 ? "obra" : "obras"} no repositório`
+    : `${n} de ${OBRAS.length} obras`;
+  $("limpar").hidden = !($("f-busca").value || $("f-tema").value || $("f-tipo").value);
+}
+
+function atualizar() { gravarEstado(); render(); }
+
+async function buscarTudo(caminho, extra) {
+  const saida = [];
+  for (let start = 0; ; start += 100) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 8000);
+    const r = await fetch(`${API}/${caminho}?format=json&limit=100&start=${start}${extra || ""}`,
+      { signal: ctrl.signal, headers: { "Zotero-API-Version": "3" } });
+    clearTimeout(t);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const lote = await r.json();
+    saida.push(...lote);
+    const total = +r.headers.get("Total-Results");
+    if (lote.length < 100 || saida.length >= total) return saida;
+  }
+}
+
+function carregar(items, colecoes, origem) {
+  OBRAS = normalizar(items, colecoes);
+  montarFiltros();
+  lerEstado();
+  render();
+  $("origem").textContent = origem + " ";
+}
+
+async function iniciar() {
+  $("lnk-zotero").href = CONFIG.groupUrl + "/library";
+  $("lnk-bibtex").href = `${API}/items/top?format=bibtex&limit=100`;
+  $("lnk-ris").href = `${API}/items/top?format=ris&limit=100`;
+  ["f-busca", "f-tema", "f-tipo", "f-ordem"].forEach(id => $(id).addEventListener("input", atualizar));
+  $("limpar").onclick = () => { $("f-busca").value = ""; $("f-tema").value = ""; $("f-tipo").value = ""; atualizar(); };
+
+  const snap = SNAPSHOT.items.length;
+  if (snap) carregar(SNAPSHOT.items, SNAPSHOT.collections, `Dados de ${SNAPSHOT.geradoEm}.`);
+  else render();
+
+  if (CONFIG.modo === "estatico") return;
+  try {
+    const [items, cols] = await Promise.all([
+      buscarTudo("items/top", `&include=data,bib&style=${ESTILO}&locale=pt-BR`),
+      buscarTudo("collections")
+    ]);
+    carregar(items, cols.map(c => ({ key: c.key, name: c.data.name })), "Dados atualizados em tempo real.");
+  } catch (e) {
+    /* Consulta bloqueada (ex.: política de segurança do site) ou indisponível: mantém a cópia embutida */
+    if (!snap) { $("lista").replaceChildren(); $("contagem").textContent = "Não foi possível carregar o repositório agora."; }
+  }
+}
+iniciar();
+</script>
+</body>
+</html>
