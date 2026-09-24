@@ -144,14 +144,14 @@
       <label>Tema
         <select id="f-tema"><option value="">Todos</option></select>
       </label>
-      <label>Tipo de obra
+      <label>Tipo de item
         <select id="f-tipo"><option value="">Todos</option></select>
       </label>
     </div>
   </div>
 
   <div class="secao">
-    <h2><span>Obras</span> do acervo</h2>
+    <h2><span>Itens</span> do acervo</h2>
     <div class="status">
       <span id="contagem" aria-live="polite"></span>
       <button id="limpar" type="button" hidden>Limpar filtros</button>
@@ -166,7 +166,7 @@
     <span id="origem"></span>
     <span>Mantido pela curadoria da ANTC.
       <a id="lnk-grupo" href="#" target="_blank" rel="noopener">Entre no grupo</a> e receba o acervo no seu Zotero.
-      Conhece uma obra que deveria estar aqui? <a id="lnk-sugestao" href="#" target="_blank" rel="noopener">Sugira a inclusão</a>.</span>
+      Conhece um item que deveria estar aqui? <a id="lnk-sugestao" href="#" target="_blank" rel="noopener">Sugira a inclusão</a>.</span>
   </div>
 </footer>
 
@@ -406,11 +406,11 @@ function render() {
         selo.className = "selo";
         const nome = document.createElement("button");
         nome.type = "button"; nome.className = "nome"; nome.textContent = a.nome;
-        nome.title = "Ver todas as obras de " + a.nome;
+        nome.title = "Ver todos os itens de " + a.nome;
         nome.onclick = () => filtrarPor("f-auditor", a.nome);
         const trib = document.createElement("button");
         trib.type = "button"; trib.className = "tribunal"; trib.textContent = a.tribunal;
-        trib.title = "Ver obras de Auditores do " + a.tribunal;
+        trib.title = "Ver itens de Auditores do " + a.tribunal;
         trib.onclick = () => filtrarPor("f-tribunal", a.tribunal);
         selo.append(nome, trib);
         ace.appendChild(selo);
@@ -483,14 +483,14 @@ function render() {
   if (!filtradas.length) {
     const li = document.createElement("li");
     li.className = "vazio";
-    li.textContent = OBRAS.length ? "Nenhuma obra encontrada com esses filtros." : "Carregando…";
+    li.textContent = OBRAS.length ? "Nenhum item encontrado com esses filtros." : "Carregando…";
     lista.appendChild(li);
   }
   const n = filtradas.length;
   const nAud = new Set(filtradas.flatMap(o => o.aces.map(a => a.nome))).size;
   const nTrib = new Set(filtradas.flatMap(o => o.aces.map(a => a.tribunal))).size;
   const plural = (k, um, varios) => `${k} ${k === 1 ? um : varios}`;
-  $("contagem").textContent = (n === OBRAS.length ? plural(n, "obra", "obras") : `${n} de ${OBRAS.length} obras`)
+  $("contagem").textContent = (n === OBRAS.length ? plural(n, "item", "itens") : `${n} de ${OBRAS.length} itens`)
     + ` · ${plural(nAud, "auditor(a)", "auditores")} · ${plural(nTrib, "tribunal", "tribunais")}`;
   $("limpar").hidden = !FILTROS.some(id => $(id).value);
 }
