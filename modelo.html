@@ -103,6 +103,7 @@
 
   footer { margin-top: 40px; background: var(--marinho); color: #c9c9e3; font-size: .85rem; }
   footer .conteudo { padding-block: 20px; display: flex; flex-wrap: wrap; gap: 6px 24px; justify-content: space-between; }
+  footer .conteudo > span:last-child { max-width: 68ch; }
   footer a { color: #fff; }
 </style>
 </head>
@@ -163,7 +164,9 @@
 <footer>
   <div class="conteudo">
     <span id="origem"></span>
-    <span>Catálogo mantido no <a href="https://www.zotero.org" target="_blank" rel="noopener">Zotero</a>. Sugestões de inclusão: entre em contato com a ANTC.</span>
+    <span>Mantido pela curadoria da ANTC.
+      <a id="lnk-grupo" href="#" target="_blank" rel="noopener">Entre no grupo</a> e receba o acervo no seu Zotero.
+      Conhece uma obra que deveria estar aqui? <a id="lnk-sugestao" href="#" target="_blank" rel="noopener">Sugira a inclusão</a>.</span>
   </div>
 </footer>
 
@@ -526,6 +529,8 @@ function carregar(items, colecoes, origem) {
 
 async function iniciar() {
   $("lnk-zotero").href = CONFIG.groupUrl + "/library";
+  $("lnk-grupo").href = CONFIG.groupUrl;
+  $("lnk-sugestao").href = CONFIG.linkSugestao;
   $("lnk-bibtex").href = `${API}/items/top?format=bibtex&limit=100`;
   $("lnk-ris").href = `${API}/items/top?format=ris&limit=100`;
   [...FILTROS, "f-ordem"].forEach(id => $(id).addEventListener("input", atualizar));
@@ -534,7 +539,7 @@ async function iniciar() {
   window.addEventListener("hashchange", () => { lerEstado(); render(); });
 
   const snap = SNAPSHOT.items.length;
-  if (snap) carregar(SNAPSHOT.items, SNAPSHOT.collections, `Dados de ${SNAPSHOT.geradoEm}.`);
+  if (snap) carregar(SNAPSHOT.items, SNAPSHOT.collections, `Atualizado em ${SNAPSHOT.geradoEm}.`);
   else render();
 
   if (CONFIG.modo === "estatico") return;
@@ -543,7 +548,7 @@ async function iniciar() {
       buscarTudo("items/top", `&include=data,bib&style=${ESTILO}&locale=pt-BR`),
       buscarTudo("collections")
     ]);
-    carregar(items, cols.map(c => ({ key: c.key, name: c.data.name })), "Dados atualizados em tempo real.");
+    carregar(items, cols.map(c => ({ key: c.key, name: c.data.name })), "Sincronizado com o Zotero em tempo real.");
   } catch (e) {
     /* Consulta bloqueada (ex.: política de segurança do site) ou indisponível: mantém a cópia embutida */
     if (!snap) { $("lista").replaceChildren(); $("contagem").textContent = "Não foi possível carregar o acervo agora."; }

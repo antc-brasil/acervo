@@ -31,6 +31,8 @@ CONFIG = {
     "modo": "auto",
     # Tags de controle interno que não devem aparecer como tema
     "tagsIgnoradas": ["lido", "a revisar", "a ler"],
+    # Destino de "Sugira a inclusão" (trocar pelo formulário quando existir)
+    "linkSugestao": "https://www.antcbrasil.org.br/contato",
     # Oculta resumos que começam com "[Resumo gerado por IA"
     "ocultarResumosIA": True,
 }
