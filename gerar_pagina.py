@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Gera repositorio.html a partir da biblioteca pública do grupo Zotero da ANTC.
+"""Gera acervo.html a partir da biblioteca pública do grupo Zotero da ANTC.
 
-A página resultante é um arquivo único (HTML + CSS + JS inline, sem recursos
-externos), compatível com a CSP atual do site da ANTC
+A página resultante é um arquivo único (HTML + CSS + JS inline; a fonte Lato do
+Google Fonts é opcional e cai para fontes do sistema se bloqueada), compatível com a CSP atual do site da ANTC
 (`default-src 'self' 'unsafe-inline'`). Ela traz uma cópia dos dados embutida
 e, se a CSP do site passar a permitir `connect-src https://api.zotero.org`,
 atualiza-se sozinha a cada visita.
 
 Uso:
-    python3 gerar_pagina.py            # gera repositorio.html ao lado deste script
+    python3 gerar_pagina.py            # gera acervo.html ao lado deste script
     python3 gerar_pagina.py saida.html
 """
 
@@ -19,7 +19,7 @@ from datetime import datetime
 from pathlib import Path
 
 GROUP_ID = 6584175
-GROUP_URL = "https://www.zotero.org/groups/6584175/antc__repositrio"
+GROUP_URL = "https://www.zotero.org/groups/6584175/acervo_antc"
 ESTILO = "associacao-brasileira-de-normas-tecnicas"
 
 CONFIG = {
@@ -66,7 +66,7 @@ def enxugar(item: dict) -> dict:
 
 
 def main() -> None:
-    destino = Path(sys.argv[1]) if len(sys.argv) > 1 else AQUI / "repositorio.html"
+    destino = Path(sys.argv[1]) if len(sys.argv) > 1 else AQUI / "acervo.html"
     items = buscar_tudo("items/top", f"&include=data,bib&style={ESTILO}&locale=pt-BR")
     cols = buscar_tudo("collections")
     snapshot = {

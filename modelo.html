@@ -3,123 +3,150 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Repositório ANTC</title>
-<meta name="description" content="Produção bibliográfica de Auditores de Controle Externo dos Tribunais de Contas.">
+<title>Acervo ANTC</title>
+<meta name="description" content="Produção bibliográfica dos Auditores de Controle Externo dos Tribunais de Contas do Brasil, reunida pela ANTC.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap">
 <style>
+  /* Paleta da identidade visual da ANTC (antcbrasil.org.br) */
   :root {
-    --bg: #f7f6f3;
-    --surface: #ffffff;
-    --text: #1d1f23;
-    --muted: #5d6470;
-    --line: #e2e0da;
-    --accent: #1f4e79;
-    --accent-soft: #e6eef6;
-    --focus: #2b6cb0;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #15171a;
-      --surface: #1d2024;
-      --text: #e8e6e1;
-      --muted: #a2a8b1;
-      --line: #30343a;
-      --accent: #8db8e0;
-      --accent-soft: #22303d;
-      --focus: #8db8e0;
-    }
+    color-scheme: light;
+    --marinho: #28285b;
+    --marinho-escuro: #1e1e46;
+    --ambar: #f7ad03;
+    --ambar-texto: #8a5f00;
+    --fundo: #f3f3f7;
+    --superficie: #ffffff;
+    --texto: #252525;
+    --suave: #5c5d72;
+    --linha: #e0e0ea;
+    --link: #0b3d74;
+    --chip: #ececf4;
+    --foco: #f7ad03;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--fundo);
+    color: var(--texto);
+    font: 16px/1.6 Lato, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   }
-  .wrap { max-width: 920px; margin: 0 auto; padding: 32px 16px 64px; }
-  header h1 { font-size: 1.75rem; line-height: 1.2; margin: 0 0 8px; }
-  header p { margin: 0 0 4px; color: var(--muted); max-width: 70ch; }
-  header .acoes { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .92rem; }
-  a { color: var(--accent); }
-  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
-    outline: 2px solid var(--focus); outline-offset: 2px;
+  .conteudo { max-width: 960px; margin: 0 auto; padding-inline: 16px; }
+  a { color: var(--link); }
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+    outline: 3px solid var(--foco); outline-offset: 2px;
   }
 
-  .filtros {
-    margin: 28px 0 12px;
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
-    gap: 10px;
-  }
-  .filtros label { min-width: 0; display: flex; flex-direction: column; gap: 4px; font-size: .8rem; color: var(--muted); }
+  /* Faixa de abertura, no marinho da barra de menu do site */
+  .faixa { background: var(--marinho); color: #fff; border-bottom: 4px solid var(--ambar); }
+  .faixa .conteudo { padding-block: 36px 32px; }
+  .sobretitulo { margin: 0 0 10px; font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #c9c9e3; }
+  .faixa h1 { margin: 0; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.1; font-weight: 900; text-transform: uppercase; letter-spacing: .01em; text-wrap: balance; }
+  .faixa h1 span { color: var(--ambar); }
+  .faixa .lead { margin: 14px 0 0; max-width: 62ch; color: #e4e4f2; font-size: 1.05rem; }
+  .faixa .nota { margin: 8px 0 0; max-width: 62ch; color: #b9b9d6; font-size: .9rem; }
+  .acoes { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .pilula { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 20px; border-radius: 999px; font-size: .82rem; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; }
+  .pilula.cheia { background: var(--ambar); color: var(--marinho); }
+  .pilula.cheia:hover { background: #ffc12e; }
+  .pilula.contorno { border: 2px solid rgba(255,255,255,.55); color: #fff; }
+  .pilula.contorno:hover { border-color: #fff; }
+
+  /* Filtros */
+  .painel { background: var(--superficie); border: 1px solid var(--linha); border-radius: 10px; padding: 16px; margin-top: -18px; position: relative; box-shadow: 0 6px 18px rgba(40, 40, 91, .08); }
+  .filtros { display: grid; grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .filtros label { min-width: 0; display: flex; flex-direction: column; gap: 4px; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--marinho); }
   input, select {
-    font: inherit; font-size: .95rem; color: var(--text);
-    background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
-    padding: 8px 10px; min-width: 0; width: 100%;
+    font: inherit; font-size: .95rem; letter-spacing: 0; text-transform: none; font-weight: 400; color: var(--texto);
+    background: var(--superficie); border: 1px solid #cfd0dd; border-radius: 6px;
+    padding: 9px 10px; min-width: 0; width: 100%;
   }
   @media (max-width: 720px) { .filtros { grid-template-columns: repeat(2, minmax(0, 1fr)); } .filtros .busca { grid-column: 1 / -1; } }
 
-  .status { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: .88rem; color: var(--muted); margin-bottom: 8px; }
-  .status button { font: inherit; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; text-decoration: underline; }
+  /* Título de seção em dois tons, como no site ("MAIS conteúdos") */
+  .secao { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 16px; margin: 32px 0 14px; }
+  .secao h2 { margin: 0; font-size: 1.3rem; font-weight: 900; text-transform: uppercase; color: var(--marinho); }
+  .secao h2 span { color: var(--ambar-texto); }
+  .status { font-size: .88rem; color: var(--suave); display: flex; gap: 16px; align-items: baseline; }
+  .status button { font: inherit; font-weight: 700; background: none; border: 0; color: var(--link); cursor: pointer; padding: 0; text-decoration: underline; }
 
-  ol.lista { list-style: none; margin: 0; padding: 0; }
-  .item { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; margin-bottom: 12px; }
-  .meta { font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 6px; }
+  ol.lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .item { background: var(--superficie); border: 1px solid var(--linha); border-radius: 10px; padding: 18px 20px; }
+  .meta { font-size: .74rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--ambar-texto); margin-bottom: 6px; }
+  .meta .ano { color: var(--suave); font-weight: 700; }
   .ref { margin: 0; overflow-wrap: anywhere; }
-  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-  .tag { font: inherit; font-size: .8rem; border: 0; border-radius: 999px; padding: 2px 10px; background: var(--accent-soft); color: var(--accent); cursor: pointer; }
-  .links { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: .88rem; align-items: center; }
-  .links button { font: inherit; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; text-decoration: underline; }
-  details { margin-top: 10px; font-size: .92rem; }
-  details summary { cursor: pointer; color: var(--muted); }
-  details p { margin: 8px 0 0; }
-  .vazio { text-align: center; color: var(--muted); padding: 40px 0; }
-  footer { margin-top: 32px; font-size: .82rem; color: var(--muted); }
+  .ref b, .ref strong { color: var(--marinho); }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .tag { font: inherit; font-size: .78rem; font-weight: 700; border: 0; border-radius: 999px; padding: 3px 12px; background: var(--chip); color: var(--marinho); cursor: pointer; }
+  .tag:hover { background: #dedeee; }
+  .links { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--linha); font-size: .88rem; align-items: center; }
+  .links .pilula { min-height: 34px; padding: 6px 16px; font-size: .74rem; background: var(--marinho); color: #fff; }
+  .links .pilula:hover { background: var(--marinho-escuro); }
+  .links button { font: inherit; font-weight: 700; background: none; border: 0; color: var(--link); cursor: pointer; padding: 0; text-decoration: underline; }
+  .links a:not(.pilula) { font-weight: 700; }
+  details { margin-top: 12px; font-size: .93rem; }
+  details summary { cursor: pointer; color: var(--marinho); font-weight: 700; }
+  details p { margin: 8px 0 0; max-width: 75ch; }
+  .vazio { text-align: center; color: var(--suave); padding: 40px 0; background: none; border: 0; }
+
+  footer { margin-top: 40px; background: var(--marinho); color: #c9c9e3; font-size: .85rem; }
+  footer .conteudo { padding-block: 20px; display: flex; flex-wrap: wrap; gap: 6px 24px; justify-content: space-between; }
+  footer a { color: #fff; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>Repositório de Produção Bibliográfica</h1>
-    <p>Obras de autoria de Auditores de Controle Externo dos Tribunais de Contas do Brasil, reunidas pela ANTC para dar visibilidade ao conhecimento produzido pela carreira.</p>
-    <p>As referências apontam para o local de publicação original. O acesso ao texto completo segue as condições de cada editora ou periódico.</p>
+<header class="faixa">
+  <div class="conteudo">
+    <p class="sobretitulo">ANTC · Auditores de Controle Externo</p>
+    <h1><span>Acervo</span> ANTC</h1>
+    <p class="lead">Produção bibliográfica dos Auditores de Controle Externo dos Tribunais de Contas do Brasil: livros, capítulos, artigos, teses e dissertações reunidos para dar visibilidade ao conhecimento da carreira.</p>
+    <p class="nota">As referências apontam para o local de publicação original. O acesso ao texto completo segue as condições de cada editora ou periódico.</p>
     <div class="acoes">
-      <a id="lnk-zotero" href="#" target="_blank" rel="noopener">Abrir a biblioteca no Zotero</a>
-      <a id="lnk-bibtex" href="#" download>Baixar tudo (BibTeX)</a>
-      <a id="lnk-ris" href="#" download>Baixar tudo (RIS)</a>
+      <a class="pilula cheia" id="lnk-zotero" href="#" target="_blank" rel="noopener">Abrir no Zotero</a>
+      <a class="pilula contorno" id="lnk-bibtex" href="#" target="_blank" rel="noopener">Exportar BibTeX</a>
+      <a class="pilula contorno" id="lnk-ris" href="#" target="_blank" rel="noopener">Exportar RIS</a>
     </div>
-  </header>
+  </div>
+</header>
 
-  <div class="filtros" role="search">
-    <label class="busca">Buscar
-      <input id="f-busca" type="search" placeholder="Título, autor, assunto…" autocomplete="off">
-    </label>
-    <label>Tema
-      <select id="f-tema"><option value="">Todos</option></select>
-    </label>
-    <label>Tipo de obra
-      <select id="f-tipo"><option value="">Todos</option></select>
-    </label>
-    <label>Ordenar por
-      <select id="f-ordem">
-        <option value="ano">Mais recentes</option>
-        <option value="autor">Autor (A–Z)</option>
-        <option value="titulo">Título (A–Z)</option>
-      </select>
-    </label>
+<main class="conteudo">
+  <div class="painel">
+    <div class="filtros" role="search">
+      <label class="busca">Buscar
+        <input id="f-busca" type="search" placeholder="Título, autor, assunto…" autocomplete="off">
+      </label>
+      <label>Tema
+        <select id="f-tema"><option value="">Todos</option></select>
+      </label>
+      <label>Tipo de obra
+        <select id="f-tipo"><option value="">Todos</option></select>
+      </label>
+      <label>Ordenar por
+        <select id="f-ordem">
+          <option value="ano">Mais recentes</option>
+          <option value="autor">Autor (A–Z)</option>
+          <option value="titulo">Título (A–Z)</option>
+        </select>
+      </label>
+    </div>
   </div>
 
-  <div class="status">
-    <span id="contagem" aria-live="polite"></span>
-    <button id="limpar" type="button" hidden>Limpar filtros</button>
+  <div class="secao">
+    <h2><span>Obras</span> do acervo</h2>
+    <div class="status">
+      <span id="contagem" aria-live="polite"></span>
+      <button id="limpar" type="button" hidden>Limpar filtros</button>
+    </div>
   </div>
 
   <ol class="lista" id="lista"></ol>
+</main>
 
-  <footer>
+<footer>
+  <div class="conteudo">
     <span id="origem"></span>
-    Catálogo mantido no <a href="https://www.zotero.org" target="_blank" rel="noopener">Zotero</a>. Sugestões de inclusão: entre em contato com a ANTC.
-  </footer>
-</div>
+    <span>Catálogo mantido no <a href="https://www.zotero.org" target="_blank" rel="noopener">Zotero</a>. Sugestões de inclusão: entre em contato com a ANTC.</span>
+  </div>
+</footer>
 
 <script>
 /* Configuração — gerada por gerar_pagina.py */
@@ -243,7 +270,8 @@ function render() {
 
     const meta = document.createElement("div");
     meta.className = "meta";
-    meta.textContent = [o.tipo, o.ano].filter(Boolean).join(" · ");
+    meta.textContent = o.tipo;
+    if (o.ano) { const a = document.createElement("span"); a.className = "ano"; a.textContent = " · " + o.ano; meta.appendChild(a); }
     li.appendChild(meta);
 
     const ref = o.bib ? refSegura(o.bib) : null;
@@ -282,7 +310,7 @@ function render() {
     links.className = "links";
     if (o.texto) {
       const a = document.createElement("a");
-      a.href = o.texto; a.target = "_blank"; a.rel = "noopener";
+      a.href = o.texto; a.target = "_blank"; a.rel = "noopener"; a.className = "pilula";
       a.textContent = "Acessar publicação";
       links.appendChild(a);
     }
@@ -292,7 +320,7 @@ function render() {
     copiar.onclick = async () => {
       const txt = li.querySelector(".ref").textContent.trim();
       try { await navigator.clipboard.writeText(txt); copiar.textContent = "Copiada"; }
-      catch { copiar.textContent = "Não foi possível copiar"; }
+      catch { getSelection().selectAllChildren(li.querySelector(".ref")); copiar.textContent = "Referência selecionada: use Ctrl+C"; }
       setTimeout(() => (copiar.textContent = "Copiar referência (ABNT)"), 2000);
     };
     links.appendChild(copiar);
@@ -313,7 +341,7 @@ function render() {
   }
   const n = filtradas.length;
   $("contagem").textContent = n === OBRAS.length
-    ? `${n} ${n === 1 ? "obra" : "obras"} no repositório`
+    ? `${n} ${n === 1 ? "obra" : "obras"} no acervo`
     : `${n} de ${OBRAS.length} obras`;
   $("limpar").hidden = !($("f-busca").value || $("f-tema").value || $("f-tipo").value);
 }
@@ -341,7 +369,7 @@ function carregar(items, colecoes, origem) {
   montarFiltros();
   lerEstado();
   render();
-  $("origem").textContent = origem + " ";
+  $("origem").textContent = origem;
 }
 
 async function iniciar() {
@@ -364,7 +392,7 @@ async function iniciar() {
     carregar(items, cols.map(c => ({ key: c.key, name: c.data.name })), "Dados atualizados em tempo real.");
   } catch (e) {
     /* Consulta bloqueada (ex.: política de segurança do site) ou indisponível: mantém a cópia embutida */
-    if (!snap) { $("lista").replaceChildren(); $("contagem").textContent = "Não foi possível carregar o repositório agora."; }
+    if (!snap) { $("lista").replaceChildren(); $("contagem").textContent = "Não foi possível carregar o acervo agora."; }
   }
 }
 iniciar();
