@@ -13,6 +13,7 @@ Uso:
 """
 
 import json
+import re
 import sys
 import urllib.request
 from datetime import datetime
@@ -55,7 +56,7 @@ def buscar_tudo(caminho: str, extra: str = "") -> list:
 def enxugar(item: dict) -> dict:
     """Mantém só o que a página usa (notas e anexos já ficam de fora via items/top)."""
     d = item["data"]
-    campos = ("itemType", "title", "creators", "tags", "collections", "abstractNote", "DOI", "url",
+    campos = ("itemType", "title", "creators", "tags", "collections", "abstractNote", "DOI", "url", "extra",
               "thesisType", "publicationTitle", "bookTitle", "university", "publisher")
     return {
         "key": item["key"],
@@ -81,6 +82,12 @@ def main() -> None:
     html = html.replace("/*__CONFIG__*/{}", js(CONFIG), 1)
     html = html.replace('/*__SNAPSHOT__*/{"items": [], "collections": [], "geradoEm": ""}', js(snapshot), 1)
     destino.write_text(html, encoding="utf-8")
+    # Aviso para a curadoria: obras sem Auditor(a) identificado no campo Extra
+    padrao = re.compile(r"^[^:()]+?\s*\([^():]+\)$")
+    for i in snapshot["items"]:
+        linhas = re.split(r"\n|;", i["data"].get("extra", ""))
+        if not any(padrao.match(l.strip()) for l in linhas):
+            print(f"  sem Auditor(a) no campo Extra: {i['data'].get('title', i['key'])[:70]}")
     print(f"{len(snapshot['items'])} obras, {len(snapshot['collections'])} coleções → {destino}")
 
 
