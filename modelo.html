@@ -49,7 +49,7 @@
   .pilula { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 20px; border-radius: 999px; font-size: .82rem; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; }
   .pilula.cheia { background: var(--ambar); color: var(--marinho); }
   .pilula.cheia:hover { background: #ffc12e; }
-  .pilula.contorno { border: 2px solid rgba(255,255,255,.55); color: #fff; }
+  .pilula.contorno { border: 2px solid rgba(255,255,255,.55); color: #fff; background: none; font-family: inherit; cursor: pointer; }
   .pilula.contorno:hover { border-color: #fff; }
 
   /* Filtros */
@@ -115,9 +115,8 @@
     <p class="lead">A produção bibliográfica dos Auditores de Controle Externo reunida em um só lugar: livros, capítulos, artigos, teses, dissertações e outras publicações. O conhecimento gerado pela carreira ao seu alcance.</p>
     <p class="nota">As referências apontam para o local de publicação original. O acesso ao texto completo segue as condições de cada fonte, como editoras, periódicos, repositórios institucionais e portais de notícias.</p>
     <div class="acoes">
-      <a class="pilula cheia" id="lnk-zotero" href="#" target="_blank" rel="noopener">Abrir no Zotero</a>
-      <a class="pilula contorno" id="lnk-bibtex" href="#" target="_blank" rel="noopener">Exportar BibTeX</a>
-      <a class="pilula contorno" id="lnk-ris" href="#" target="_blank" rel="noopener">Exportar RIS</a>
+      <button type="button" class="pilula contorno" id="exp-bibtex" data-formato="bibtex">Exportar BibTeX</button>
+      <button type="button" class="pilula contorno" id="exp-ris" data-formato="ris">Exportar RIS</button>
     </div>
   </div>
 </header>
@@ -165,7 +164,6 @@
   <div class="conteudo">
     <span id="origem"></span>
     <span>Mantido pela curadoria da ANTC.
-      <a id="lnk-grupo" href="#" target="_blank" rel="noopener">Entre no grupo</a> e receba o acervo no seu Zotero.
       Conhece um item que deveria estar aqui? <a id="lnk-sugestao" href="#" target="_blank" rel="noopener">Sugira a inclusão</a>.</span>
   </div>
 </footer>
@@ -247,7 +245,9 @@ function normalizar(raw, colecoes) {
       resumo: CONFIG.ocultarResumosIA && /^\[resumo gerado por ia/i.test(resumo) ? "" : resumo,
       texto: doi ? "https://doi.org/" + doi.replace(/^https?:\/\/(dx\.)?doi\.org\//, "") : (d.url || ""),
       bib: it.bib || "",
-      zotero: CONFIG.groupUrl + "/items/" + it.key,
+      bibtex: (it.bibtex || "").trim(),
+      ris: (it.ris || "").trim(),
+      chave: ((it.bibtex || "").match(/@\w+\{([^,\s]+),/) || [, it.key])[1],
       busca: semAcento([d.title, autores.join(" "), aces.map(a => a.nome + " " + a.tribunal).join(" "), tags.join(" "), resumo, d.publicationTitle, d.bookTitle, d.university, d.publisher].join(" "))
     };
   });
@@ -471,10 +471,14 @@ function render() {
       setTimeout(() => (copiar.textContent = "Copiar referência (ABNT)"), ok ? 2000 : 6000);
     };
     links.appendChild(copiar);
-    const z = document.createElement("a");
-    z.href = o.zotero; z.target = "_blank"; z.rel = "noopener";
-    z.textContent = "Ver no Zotero";
-    links.appendChild(z);
+    [["ris", "Baixar RIS"], ["bibtex", "Baixar BibTeX"]].forEach(([formato, rotulo]) => {
+      if (!o[formato]) return;
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "baixar"; b.textContent = rotulo;
+      b.title = `Citação deste item em ${formato === "ris" ? "RIS" : "BibTeX"}, para gerenciadores de referências`;
+      b.onclick = () => baixar(o[formato], o.chave, formato);
+      links.appendChild(b);
+    });
     li.appendChild(links);
 
     lista.appendChild(li);
@@ -519,6 +523,25 @@ async function buscarTudo(caminho, extra) {
   }
 }
 
+/* Citações em RIS e BibTeX: vêm prontas com cada item (include=bibtex,ris) e o arquivo é gerado na página */
+const EXPORTACOES = { bibtex: { ext: "bib", tipo: "application/x-bibtex" },
+                      ris: { ext: "ris", tipo: "application/x-research-info-systems" } };
+
+function baixar(texto, nome, formato) {
+  const url = URL.createObjectURL(new Blob([texto + "\n"], { type: EXPORTACOES[formato].tipo + ";charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = `${nome}.${EXPORTACOES[formato].ext}`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+/* Acervo completo: junta as citações de todos os itens */
+function exportar(botao) {
+  const formato = botao.dataset.formato;
+  const texto = OBRAS.map(o => o[formato]).filter(Boolean).join("\n\n");
+  if (texto) baixar(texto, "acervo-antc", formato);
+}
+
 function carregar(items, colecoes, origem) {
   OBRAS = normalizar(items, colecoes);
   montarFiltros();
@@ -528,11 +551,8 @@ function carregar(items, colecoes, origem) {
 }
 
 async function iniciar() {
-  $("lnk-zotero").href = CONFIG.groupUrl + "/library";
-  $("lnk-grupo").href = CONFIG.groupUrl;
   $("lnk-sugestao").href = CONFIG.linkSugestao;
-  $("lnk-bibtex").href = `${API}/items/top?format=bibtex&limit=100`;
-  $("lnk-ris").href = `${API}/items/top?format=ris&limit=100`;
+  ["exp-bibtex", "exp-ris"].forEach(id => ($(id).onclick = () => exportar($(id))));
   [...FILTROS, "f-ordem"].forEach(id => $(id).addEventListener("input", atualizar));
   $("limpar").onclick = () => { FILTROS.forEach(id => ($(id).value = "")); atualizar(); };
   /* Link com filtro aberto na mesma aba (só o "#…" muda): reaplica o filtro */
@@ -545,10 +565,10 @@ async function iniciar() {
   if (CONFIG.modo === "estatico") return;
   try {
     const [items, cols] = await Promise.all([
-      buscarTudo("items/top", `&include=data,bib&style=${ESTILO}&locale=pt-BR`),
+      buscarTudo("items/top", `&include=data,bib,bibtex,ris&style=${ESTILO}&locale=pt-BR`),
       buscarTudo("collections")
     ]);
-    carregar(items, cols.map(c => ({ key: c.key, name: c.data.name })), "Sincronizado com o Zotero em tempo real.");
+    carregar(items, cols.map(c => ({ key: c.key, name: c.data.name })), "Atualizado em tempo real.");
   } catch (e) {
     /* Consulta bloqueada (ex.: política de segurança do site) ou indisponível: mantém a cópia embutida */
     if (!snap) { $("lista").replaceChildren(); $("contagem").textContent = "Não foi possível carregar o acervo agora."; }

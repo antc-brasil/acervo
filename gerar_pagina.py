@@ -20,13 +20,11 @@ from datetime import datetime
 from pathlib import Path
 
 GROUP_ID = 6584175
-GROUP_URL = "https://www.zotero.org/groups/6584175/acervo_antc"
 # Universidade Federal do Rio Grande do Sul - ABNT (autoria completa)
 ESTILO = "associacao-brasileira-de-normas-tecnicas-ufrgs"
 
 CONFIG = {
     "groupId": GROUP_ID,
-    "groupUrl": GROUP_URL,
     # "auto": usa a cópia embutida e tenta atualizar pela API; "estatico": só a cópia
     "modo": "auto",
     # Tags de controle interno que não devem aparecer como tema
@@ -65,13 +63,15 @@ def enxugar(item: dict) -> dict:
         "key": item["key"],
         "meta": {"parsedDate": item.get("meta", {}).get("parsedDate", "")},
         "bib": item.get("bib", ""),
+        "bibtex": item.get("bibtex", ""),
+        "ris": item.get("ris", ""),
         "data": {k: d[k] for k in campos if d.get(k)},
     }
 
 
 def main() -> None:
     destino = Path(sys.argv[1]) if len(sys.argv) > 1 else AQUI / "acervo.html"
-    items = buscar_tudo("items/top", f"&include=data,bib&style={ESTILO}&locale=pt-BR")
+    items = buscar_tudo("items/top", f"&include=data,bib,bibtex,ris&style={ESTILO}&locale=pt-BR")
     cols = buscar_tudo("collections")
     snapshot = {
         "items": [enxugar(i) for i in items if not i["data"].get("deleted")],
