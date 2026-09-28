@@ -22,6 +22,9 @@ from pathlib import Path
 GROUP_ID = 6584175
 # Universidade Federal do Rio Grande do Sul - ABNT (autoria completa)
 ESTILO = "associacao-brasileira-de-normas-tecnicas-ufrgs"
+# Outros formatos da caixa "Como citar" (estilos CSL do Zotero, em pt-BR)
+ESTILOS_EXTRAS = {"APA": "apa", "Chicago": "chicago-author-date", "Harvard": "harvard-cite-them-right",
+                  "IEEE": "ieee", "MLA": "modern-language-association", "Vancouver": "vancouver"}
 
 CONFIG = {
     "groupId": GROUP_ID,
@@ -56,6 +59,15 @@ def buscar_tudo(caminho: str, extra: str = "") -> list:
         start += 100
 
 
+def citacoes_extras() -> dict:
+    """{chave do item: {formato: bib}} para os formatos além do ABNT."""
+    saida = {}
+    for nome, estilo in ESTILOS_EXTRAS.items():
+        for i in buscar_tudo("items/top", f"&include=bib&style={estilo}&locale=pt-BR"):
+            saida.setdefault(i["key"], {})[nome] = i.get("bib", "")
+    return saida
+
+
 def enxugar(item: dict) -> dict:
     """Mantém só o que a página usa (notas e anexos já ficam de fora via items/top)."""
     d = item["data"]
@@ -67,6 +79,7 @@ def enxugar(item: dict) -> dict:
         "bib": item.get("bib", ""),
         "bibtex": item.get("bibtex", ""),
         "ris": item.get("ris", ""),
+        "citacoes": item.get("citacoes", {}),
         "data": {k: d[k] for k in campos if d.get(k)},
     }
 
@@ -75,6 +88,9 @@ def main() -> None:
     destino = Path(sys.argv[1]) if len(sys.argv) > 1 else AQUI / "acervo.html"
     items = buscar_tudo("items/top", f"&include=data,bib,bibtex,ris&style={ESTILO}&locale=pt-BR")
     cols = buscar_tudo("collections")
+    extras = citacoes_extras()
+    for i in items:
+        i["citacoes"] = extras.get(i["key"], {})
     snapshot = {
         "items": [enxugar(i) for i in items if not i["data"].get("deleted")],
         "collections": [{"key": c["key"], "name": c["data"]["name"]}

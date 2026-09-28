@@ -81,6 +81,21 @@
   .item .titulo a::after { content: "\2197"; margin-left: 6px; font-size: .8em; color: var(--ambar-texto); }
   .item .titulo { margin: 0 0 10px; font-size: 1.12rem; line-height: 1.35; font-weight: 900; color: var(--marinho); text-wrap: pretty; overflow-wrap: anywhere; }
   .ref { margin: 0; overflow-wrap: anywhere; }
+  /* Caixa "Como citar", no padrão das páginas de artigo do OJS */
+  .citar { margin-top: 4px; border: 1px solid var(--linha); border-radius: 8px; background: var(--superficie); }
+  .citar-cab { padding: 8px 14px; background: #f5f5f9; border-bottom: 1px solid var(--linha); border-radius: 8px 8px 0 0; font-size: .74rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--marinho); display: flex; justify-content: space-between; gap: 8px; }
+  .citar-cab .estilo { color: var(--ambar-texto); }
+  .citar-corpo { padding: 12px 14px 14px; }
+  .citar-acoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .menu { position: relative; }
+  .menu > button, .citar-acoes > button { font: inherit; font-size: .85rem; font-weight: 700; color: var(--marinho); background: var(--chip); border: 1px solid #d6d6e4; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+  .menu > button:hover, .citar-acoes > button:hover { background: #dedeee; }
+  .menu > button::after { content: ""; display: inline-block; margin-left: 8px; vertical-align: 3px; border: 5px solid transparent; border-top-color: currentColor; border-bottom: 0; }
+  .menu ul { position: absolute; z-index: 5; top: calc(100% + 4px); left: 0; min-width: 190px; margin: 0; padding: 6px 0; list-style: none; background: var(--superficie); border: 1px solid var(--linha); border-radius: 8px; box-shadow: 0 8px 22px rgba(40, 40, 91, .16); }
+  .menu li button { display: block; width: 100%; text-align: left; font: inherit; font-size: .9rem; background: none; border: 0; padding: 6px 14px; color: var(--texto); cursor: pointer; }
+  .menu li button:hover, .menu li button:focus-visible { background: var(--chip); }
+  .menu li button[aria-checked="true"] { font-weight: 900; color: var(--marinho); }
+  .menu li button[aria-checked="true"]::after { content: " ✓"; color: var(--ambar-texto); }
   .ref mark { background: var(--ambar-claro); color: inherit; font-weight: inherit; padding: 0 2px; border-radius: 3px; }
 
   /* Autoria ACE: selos com nome e tribunal de cada Auditor(a) entre os autores */
@@ -186,7 +201,7 @@ const TIPOS = {
   journalArticle: "Artigo de periódico", book: "Livro", bookSection: "Capítulo de livro",
   conferencePaper: "Trabalho em evento", report: "Relatório",
   magazineArticle: "Artigo de revista", newspaperArticle: "Artigo de jornal",
-  webpage: "Página web", blogPost: "Publicação em blog", presentation: "Apresentação",
+  webpage: "Artigo de opinião", blogPost: "Publicação em blog", presentation: "Apresentação",
   document: "Documento", encyclopediaArticle: "Verbete", manuscript: "Manuscrito"
 };
 const API = "https://api.zotero.org/groups/" + CONFIG.groupId;
@@ -240,6 +255,11 @@ function normalizar(raw, colecoes) {
     const destaques = (d.creators || [])
       .filter(c => aces.some(a => ehAuditor(c, a.nome)))
       .flatMap(formasNaReferencia);
+    /* Nos outros estilos o nome aparece em caixa normal ("Viana, I. dos S.", "Ismar dos Santos Viana"...) */
+    const destaquesOutros = (d.creators || [])
+      .filter(c => c.lastName && aces.some(a => ehAuditor(c, a.nome)))
+      .flatMap(formasOutrosEstilos)
+      .filter(f => f.trim().length > 3);
     return {
       key: it.key,
       tipo,
@@ -249,10 +269,12 @@ function normalizar(raw, colecoes) {
       tags,
       aces,
       destaques,
+      destaquesOutros,
       colecoes: (d.collections || []).map(k => nomesCol[k]).filter(Boolean),
       resumo: CONFIG.ocultarResumosIA && /^\[resumo gerado por ia/i.test(resumo) ? "" : resumo,
       texto: doi ? "https://doi.org/" + doi.replace(/^https?:\/\/(dx\.)?doi\.org\//, "") : (d.url || ""),
       bib: it.bib || "",
+      citacoes: it.citacoes || {},
       bibtex: (it.bibtex || "").trim(),
       ris: (it.ris || "").trim(),
       chave: ((it.bibtex || "").match(/@\w+\{([^,\s]+),/) || [, it.key])[1],
@@ -265,6 +287,7 @@ function normalizar(raw, colecoes) {
 function refSegura(html) {
   const doc = new DOMParser().parseFromString(html, "text/html");
   const alvo = doc.querySelector(".csl-entry") || doc.body;
+  alvo.querySelectorAll(".csl-left-margin").forEach(n => n.remove());
   const saida = document.createElement("p");
   saida.className = "ref";
   const permitidas = new Set(["B", "I", "EM", "STRONG", "SUP", "SUB"]);
@@ -279,6 +302,7 @@ function refSegura(html) {
     });
   })(alvo, saida);
   saida.normalize();
+  if (saida.firstChild && saida.firstChild.nodeType === 3) saida.firstChild.textContent = saida.firstChild.textContent.trimStart();
   return saida;
 }
 
@@ -291,6 +315,32 @@ function formasNaReferencia(c) {
     .map(p => /^\p{Ll}/u.test(p) ? p : p.split("-").map(x => x.charAt(0) + ".").join("-"))
     .join(" ");
   return [sobrenome + ", " + iniciais, sobrenome + ", " + c.firstName.trim()];
+}
+
+/* Formas do autor nos estilos APA, Chicago, Harvard, IEEE, MLA e Vancouver — ex.: "Ismar dos Santos Viana":
+   "Viana, Ismar dos Santos", "Ismar dos Santos Viana", "Viana, I. dos S." (APA/Harvard),
+   "I. dos S. Viana" (IEEE), "Viana I dos S" (Vancouver); "José Roberto Pimenta de" junta as iniciais:
+   "J. R. P. de" / "J.R.P. de" / "JRP de" */
+function formasOutrosEstilos(c) {
+  const sob = c.lastName, pre = (c.firstName || "").trim();
+  if (!pre) return [sob];
+  const partes = pre.split(/\s+/).map(p => /^\p{Ll}/u.test(p) ? { part: p } : { ini: p.split("-").map(x => x.charAt(0)) });
+  const marcarFim = (fmt, sepIni) => {
+    const out = []; let anteriorIni = false;
+    partes.forEach(x => {
+      if (x.part) { out.push(x.part); anteriorIni = false; return; }
+      const t = fmt(x.ini);
+      if (anteriorIni && sepIni !== null) out[out.length - 1] += sepIni + t; else out.push(t);
+      anteriorIni = true;
+    });
+    return out.join(" ");
+  };
+  const comPonto = ini => ini.map(l => l + ".").join("-");
+  const semPonto = ini => ini.join("");
+  const espacado = marcarFim(comPonto, " ");      // "J. R. P. de"
+  const colado = marcarFim(comPonto, "");         // "J.R.P. de"
+  const vancouver = marcarFim(semPonto, "");      // "JRP de"
+  return [sob + ", " + pre, pre + " " + sob, sob + ", " + espacado, sob + ", " + colado, espacado + " " + sob, sob + " " + vancouver];
 }
 
 /* Marca, no texto da referência, os autores que são Auditores de Controle Externo */
@@ -332,6 +382,128 @@ function copiarPorSelecao(txt, junto) {
   if (ok) caixa.remove();
   else setTimeout(() => caixa.remove(), 30000);
   return ok;
+}
+
+/* Referência ABNT (Zotero), com os Auditores destacados */
+function refABNT(o) {
+  let ref = o.bib ? refSegura(o.bib) : null;
+  if (!ref || !ref.textContent.trim()) {
+    ref = document.createElement("p");
+    ref.className = "ref";
+    ref.textContent = [o.autores.join("; "), o.titulo, o.ano].filter(Boolean).join(". ") + ".";
+  }
+  destacar(ref, o.destaques);
+  return ref;
+}
+
+/* Menu suspenso acessível: botão + lista de opções */
+function menuSuspenso(rotulo, opcoes, classe) {
+  const caixa = document.createElement("div");
+  caixa.className = "menu" + (classe ? " " + classe : "");
+  const botao = document.createElement("button");
+  botao.type = "button"; botao.textContent = rotulo;
+  botao.setAttribute("aria-haspopup", "true"); botao.setAttribute("aria-expanded", "false");
+  const lista = document.createElement("ul");
+  lista.setAttribute("role", "menu"); lista.hidden = true;
+  const fechar = () => { lista.hidden = true; botao.setAttribute("aria-expanded", "false"); };
+  opcoes.forEach(op => {
+    const li = document.createElement("li"); li.setAttribute("role", "none");
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = op.rotulo; b.setAttribute("role", op.marcavel ? "menuitemradio" : "menuitem");
+    if (op.marcavel) b.setAttribute("aria-checked", op.marcado ? "true" : "false");
+    if (op.titulo) b.title = op.titulo;
+    b.onclick = () => {
+      if (op.marcavel) lista.querySelectorAll("[aria-checked]").forEach(x => x.setAttribute("aria-checked", x === b ? "true" : "false"));
+      fechar(); botao.focus(); op.acao();
+    };
+    li.appendChild(b); lista.appendChild(li);
+  });
+  botao.onclick = (e) => {
+    e.stopPropagation();
+    const abrir = lista.hidden;
+    document.querySelectorAll(".menu ul:not([hidden])").forEach(u => { u.hidden = true; u.previousElementSibling.setAttribute("aria-expanded", "false"); });
+    lista.hidden = !abrir; botao.setAttribute("aria-expanded", String(abrir));
+    if (abrir) lista.querySelector("button").focus();
+  };
+  caixa.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !lista.hidden) { fechar(); botao.focus(); }
+    if ((e.key === "ArrowDown" || e.key === "ArrowUp") && !lista.hidden) {
+      e.preventDefault();
+      const itens = [...lista.querySelectorAll("button")];
+      const k = itens.indexOf(document.activeElement);
+      itens[(k + (e.key === "ArrowDown" ? 1 : itens.length - 1)) % itens.length].focus();
+    }
+  });
+  caixa.append(botao, lista);
+  return caixa;
+}
+document.addEventListener("click", (e) => {
+  if (e.target.closest(".menu")) return;
+  document.querySelectorAll(".menu ul:not([hidden])").forEach(u => { u.hidden = true; u.previousElementSibling.setAttribute("aria-expanded", "false"); });
+});
+
+/* Caixa "Como citar": referência no estilo escolhido + menus de formatos e de download */
+/* Estilos CSL do Zotero para cada formato (o ABNT vem em "bib"; os demais, em "citacoes") */
+const ESTILOS = { APA: "apa", Chicago: "chicago-author-date", Harvard: "harvard-cite-them-right",
+                  IEEE: "ieee", MLA: "modern-language-association", Vancouver: "vancouver" };
+const FORMATOS = ["ABNT", ...Object.keys(ESTILOS)];
+
+/* Item novo, ainda sem os outros estilos na cópia embutida: busca o estilo quando for escolhido */
+async function citacaoSobDemanda(o, nome) {
+  if (o.citacoes[nome] || CONFIG.modo === "estatico") return o.citacoes[nome] || "";
+  try {
+    const r = await fetch(`${API}/items/${o.key}?format=json&include=bib&style=${ESTILOS[nome]}&locale=pt-BR`,
+      { headers: { "Zotero-API-Version": "3" } });
+    if (r.ok) o.citacoes[nome] = (await r.json()).bib || "";
+  } catch { /* consulta indisponível */ }
+  return o.citacoes[nome] || "";
+}
+function comoCitar(o) {
+  const caixa = document.createElement("section");
+  caixa.className = "citar";
+  const cab = document.createElement("div");
+  cab.className = "citar-cab";
+  const tit = document.createElement("span"); tit.textContent = "Como citar";
+  const est = document.createElement("span"); est.className = "estilo"; est.textContent = "ABNT";
+  cab.append(tit, est);
+  const corpo = document.createElement("div");
+  corpo.className = "citar-corpo";
+  let estilo = "ABNT";
+  let ref = refABNT(o);
+  corpo.appendChild(ref);
+  const mostrar = async (nome) => {
+    const html = nome === "ABNT" ? "" : await citacaoSobDemanda(o, nome);
+    if (nome !== "ABNT" && !html) { est.textContent = nome + " indisponível"; return; }
+    const novo = nome === "ABNT" ? refABNT(o) : refSegura(html);
+    if (nome !== "ABNT") destacar(novo, o.destaquesOutros);
+    ref.replaceWith(novo); ref = novo; estilo = nome; est.textContent = nome;
+  };
+  const acoes = document.createElement("div");
+  acoes.className = "citar-acoes";
+  const disponiveis = FORMATOS.filter(f => f === "ABNT" || o.citacoes[f] || CONFIG.modo !== "estatico");
+  if (disponiveis.length > 1)
+    acoes.appendChild(menuSuspenso("Formatos de citação",
+      disponiveis.map(f => ({ rotulo: f, marcavel: true, marcado: f === "ABNT", acao: () => mostrar(f) }))));
+  const baixaveis = [["ris", "RIS", "Mendeley, Zotero, EndNote e outros"], ["bibtex", "BibTeX", "LaTeX e JabRef"]].filter(([f]) => o[f]);
+  if (baixaveis.length)
+    acoes.appendChild(menuSuspenso("Baixar citação",
+      baixaveis.map(([f, r, t]) => ({ rotulo: r, titulo: t, acao: () => baixar(o[f], o.chave, f) })), "baixar"));
+  const copiar = document.createElement("button");
+  copiar.type = "button"; copiar.textContent = "Copiar";
+  copiar.title = "Copia a referência no formato exibido (na ABNT, a data de acesso passa a ser a de hoje)";
+  copiar.onclick = async () => {
+    const bruto = ref.textContent.trim();
+    const txt = estilo === "ABNT" ? comAcessoHoje(bruto) : bruto;
+    let ok = false;
+    try { await navigator.clipboard.writeText(txt); ok = true; }
+    catch { ok = copiarPorSelecao(txt, acoes); }
+    copiar.textContent = ok ? "Copiada" : "Selecionada: use Ctrl+C";
+    setTimeout(() => (copiar.textContent = "Copiar"), ok ? 2000 : 6000);
+  };
+  acoes.appendChild(copiar);
+  corpo.appendChild(acoes);
+  caixa.append(cab, corpo);
+  return caixa;
 }
 
 function preencherSelect(sel, valores) {
@@ -452,14 +624,7 @@ function render() {
       li.appendChild(det);
     }
 
-    let ref = o.bib ? refSegura(o.bib) : null;
-    if (!ref || !ref.textContent.trim()) {
-      ref = document.createElement("p");
-      ref.className = "ref";
-      ref.textContent = [o.autores.join("; "), o.titulo, o.ano].filter(Boolean).join(". ") + ".";
-    }
-    destacar(ref, o.destaques);
-    li.appendChild(ref);
+    li.appendChild(comoCitar(o));
 
     if (o.tags.length) {
       const tags = document.createElement("div");
@@ -478,30 +643,6 @@ function render() {
       li.appendChild(tags);
     }
 
-    const links = document.createElement("div");
-    links.className = "links";
-    const copiar = document.createElement("button");
-    copiar.type = "button";
-    copiar.textContent = "Copiar referência (ABNT)";
-    copiar.title = "A data de acesso é atualizada para hoje na cópia";
-    copiar.onclick = async () => {
-      const txt = comAcessoHoje(li.querySelector(".ref").textContent.trim());
-      let ok = false;
-      try { await navigator.clipboard.writeText(txt); ok = true; }
-      catch { ok = copiarPorSelecao(txt, links); }
-      copiar.textContent = ok ? "Copiada" : "Referência selecionada: use Ctrl+C";
-      setTimeout(() => (copiar.textContent = "Copiar referência (ABNT)"), ok ? 2000 : 6000);
-    };
-    links.appendChild(copiar);
-    [["ris", "Baixar RIS"], ["bibtex", "Baixar BibTeX"]].forEach(([formato, rotulo]) => {
-      if (!o[formato]) return;
-      const b = document.createElement("button");
-      b.type = "button"; b.className = "baixar"; b.textContent = rotulo;
-      b.title = `Citação deste item em ${formato === "ris" ? "RIS" : "BibTeX"}, para gerenciadores de referências`;
-      b.onclick = () => baixar(o[formato], o.chave, formato);
-      links.appendChild(b);
-    });
-    li.appendChild(links);
 
     lista.appendChild(li);
   });
@@ -591,6 +732,8 @@ async function iniciar() {
       buscarTudo("items/top", `&include=data,bib,bibtex,ris&style=${ESTILO}&locale=pt-BR`),
       buscarTudo("collections")
     ]);
+    const citacoes = Object.fromEntries(SNAPSHOT.items.map(i => [i.key, i.citacoes || {}]));
+    items.forEach(i => (i.citacoes = citacoes[i.key] || {}));
     carregar(items, cols.map(c => ({ key: c.key, name: c.data.name })), "Atualizado em tempo real.");
   } catch (e) {
     /* Consulta bloqueada (ex.: política de segurança do site) ou indisponível: mantém a cópia embutida */
