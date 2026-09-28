@@ -46,6 +46,7 @@
   .faixa .lead { margin: 14px 0 0; max-width: 62ch; color: #e4e4f2; font-size: 1.05rem; }
   .faixa .nota { margin: 8px 0 0; max-width: 62ch; color: #b9b9d6; font-size: .9rem; }
   .acoes { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .pilula[aria-disabled="true"] { cursor: default; }
   .pilula { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 20px; border-radius: 999px; font-size: .82rem; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; }
   .pilula.cheia { background: var(--ambar); color: var(--marinho); }
   .pilula.cheia:hover { background: #ffc12e; }
@@ -75,20 +76,28 @@
   .item { background: var(--superficie); border: 1px solid var(--linha); border-radius: 10px; padding: 18px 20px; }
   .meta { font-size: .74rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--ambar-texto); margin-bottom: 6px; }
   .meta .ano { color: var(--suave); font-weight: 700; }
+  .item .titulo a { color: inherit; text-decoration: none; }
+  .item .titulo a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .item .titulo a::after { content: "\2197"; margin-left: 6px; font-size: .8em; color: var(--ambar-texto); }
+  .item .titulo { margin: 0 0 10px; font-size: 1.12rem; line-height: 1.35; font-weight: 900; color: var(--marinho); text-wrap: pretty; overflow-wrap: anywhere; }
   .ref { margin: 0; overflow-wrap: anywhere; }
-  .ref mark { background: var(--ambar-claro); color: inherit; font-weight: 700; padding: 0 2px; border-radius: 3px; }
+  .ref mark { background: var(--ambar-claro); color: inherit; font-weight: inherit; padding: 0 2px; border-radius: 3px; }
 
-  /* Autoria ACE: quem, entre os autores, é Auditor de Controle Externo */
-  .ace { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 2px 0 12px; }
-  .ace-rotulo { font-size: .72rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--suave); margin-right: 2px; }
-  .selo { display: inline-flex; border-radius: 999px; overflow: hidden; font: inherit; font-size: .88rem; max-width: 100%; }
+  /* Autoria ACE: selos com nome e tribunal de cada Auditor(a) entre os autores */
+  /* Rótulo à esquerda; os selos quebram linha alinhados entre si, não sob o rótulo */
+  .ace { display: flex; align-items: flex-start; gap: 10px; margin: 2px 0 12px; }
+  .ace-rotulo { flex: none; line-height: 31px; font-size: .72rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--suave); }
+  .selos { display: flex; flex-wrap: wrap; gap: 6px 8px; min-width: 0; }
+  @media (max-width: 560px) { .ace { flex-direction: column; gap: 4px; } .ace-rotulo { line-height: 1.4; } }
+  .selo { display: inline-flex; border-radius: 16px; overflow: hidden; font: inherit; font-size: .88rem; max-width: 100%; }
   .selo button { font: inherit; border: 0; cursor: pointer; padding: 5px 12px; }
   .selo .nome { background: var(--marinho); color: #fff; font-weight: 700; text-align: left; overflow-wrap: anywhere; }
   .selo .nome:hover { background: var(--marinho-escuro); }
   .selo .tribunal { background: var(--ambar); color: var(--marinho); font-weight: 900; letter-spacing: .04em; white-space: nowrap; }
   .selo .tribunal:hover { background: #ffc12e; }
   .ref b, .ref strong { color: var(--marinho); }
-  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; }
+  .tags-rotulo { font-size: .72rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--suave); margin-right: 4px; }
   .tag { font: inherit; font-size: .78rem; font-weight: 700; border: 0; border-radius: 999px; padding: 3px 12px; background: var(--chip); color: var(--marinho); cursor: pointer; }
   .tag:hover { background: #dedeee; }
   .links { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--linha); font-size: .88rem; align-items: center; }
@@ -96,7 +105,7 @@
   .links .pilula:hover { background: var(--marinho-escuro); }
   .links button { font: inherit; font-weight: 700; background: none; border: 0; color: var(--link); cursor: pointer; padding: 0; text-decoration: underline; }
   .links a:not(.pilula) { font-weight: 700; }
-  details { margin-top: 12px; font-size: .93rem; }
+  details { margin: 0 0 12px; font-size: .93rem; }
   details summary { cursor: pointer; color: var(--marinho); font-weight: 700; }
   details p { margin: 8px 0 0; max-width: 75ch; }
   .vazio { text-align: center; color: var(--suave); padding: 40px 0; background: none; border: 0; }
@@ -115,8 +124,7 @@
     <p class="lead">A produção bibliográfica dos Auditores de Controle Externo reunida em um só lugar: livros, capítulos, artigos, teses, dissertações e outras publicações. O conhecimento gerado pela carreira ao seu alcance.</p>
     <p class="nota">As referências apontam para o local de publicação original. O acesso ao texto completo segue as condições de cada fonte, como editoras, periódicos, repositórios institucionais e portais de notícias.</p>
     <div class="acoes">
-      <button type="button" class="pilula contorno" id="exp-bibtex" data-formato="bibtex">Exportar BibTeX</button>
-      <button type="button" class="pilula contorno" id="exp-ris" data-formato="ris">Exportar RIS</button>
+      <a class="pilula cheia" id="lnk-indicar" href="#" target="_blank" rel="noopener">Indicar material para o acervo</a>
     </div>
   </div>
 </header>
@@ -125,7 +133,7 @@
   <div class="painel">
     <div class="filtros" role="search">
       <label class="busca">Buscar
-        <input id="f-busca" type="search" placeholder="Título, autor, tribunal, assunto…" autocomplete="off">
+        <input id="f-busca" type="search" placeholder="Título, auditor, tribunal, assunto…" autocomplete="off">
       </label>
       <label class="ordem">Ordenar por
         <select id="f-ordem">
@@ -394,13 +402,29 @@ function render() {
     if (o.ano) { const a = document.createElement("span"); a.className = "ano"; a.textContent = " · " + o.ano; meta.appendChild(a); }
     li.appendChild(meta);
 
+    if (o.titulo) {
+      const h = document.createElement("h3");
+      h.className = "titulo";
+      /* O título leva à publicação na origem (DOI ou URL) */
+      if (o.texto) {
+        const a = document.createElement("a");
+        a.href = o.texto; a.target = "_blank"; a.rel = "noopener";
+        a.title = "Acessar a publicação na origem";
+        a.textContent = o.titulo;
+        h.appendChild(a);
+      } else h.textContent = o.titulo;
+      li.appendChild(h);
+    }
+
     if (o.aces.length) {
       const ace = document.createElement("div");
       ace.className = "ace";
-      const rot = document.createElement("span");
-      rot.className = "ace-rotulo";
-      rot.textContent = o.aces.length === 1 ? "Auditor(a) de Controle Externo" : "Auditores de Controle Externo";
-      ace.appendChild(rot);
+      const rotAce = document.createElement("span");
+      rotAce.className = "ace-rotulo";
+      rotAce.textContent = o.aces.length === 1 ? "Auditor(a)" : "Auditores";
+      const selos = document.createElement("div");
+      selos.className = "selos";
+      ace.append(rotAce, selos);
       o.aces.forEach(a => {
         const selo = document.createElement("span");
         selo.className = "selo";
@@ -413,9 +437,19 @@ function render() {
         trib.title = "Ver itens de Auditores do " + a.tribunal;
         trib.onclick = () => filtrarPor("f-tribunal", a.tribunal);
         selo.append(nome, trib);
-        ace.appendChild(selo);
+        selos.appendChild(selo);
       });
       li.appendChild(ace);
+    }
+
+    if (o.resumo) {
+      const det = document.createElement("details");
+      const sum = document.createElement("summary");
+      sum.textContent = "Resumo";
+      const p = document.createElement("p");
+      p.textContent = o.resumo;
+      det.append(sum, p);
+      li.appendChild(det);
     }
 
     let ref = o.bib ? refSegura(o.bib) : null;
@@ -430,6 +464,10 @@ function render() {
     if (o.tags.length) {
       const tags = document.createElement("div");
       tags.className = "tags";
+      const rotTags = document.createElement("span");
+      rotTags.className = "tags-rotulo";
+      rotTags.textContent = "Palavras-chave";
+      tags.appendChild(rotTags);
       o.tags.forEach(t => {
         const b = document.createElement("button");
         b.type = "button"; b.className = "tag"; b.textContent = t;
@@ -440,24 +478,8 @@ function render() {
       li.appendChild(tags);
     }
 
-    if (o.resumo) {
-      const det = document.createElement("details");
-      const sum = document.createElement("summary");
-      sum.textContent = "Resumo";
-      const p = document.createElement("p");
-      p.textContent = o.resumo;
-      det.append(sum, p);
-      li.appendChild(det);
-    }
-
     const links = document.createElement("div");
     links.className = "links";
-    if (o.texto) {
-      const a = document.createElement("a");
-      a.href = o.texto; a.target = "_blank"; a.rel = "noopener"; a.className = "pilula";
-      a.textContent = "Acessar publicação";
-      links.appendChild(a);
-    }
     const copiar = document.createElement("button");
     copiar.type = "button";
     copiar.textContent = "Copiar referência (ABNT)";
@@ -523,7 +545,7 @@ async function buscarTudo(caminho, extra) {
   }
 }
 
-/* Citações em RIS e BibTeX: vêm prontas com cada item (include=bibtex,ris) e o arquivo é gerado na página */
+/* Citação de cada item em RIS e BibTeX: vem pronta do Zotero (include=bibtex,ris) e o arquivo é gerado na página */
 const EXPORTACOES = { bibtex: { ext: "bib", tipo: "application/x-bibtex" },
                       ris: { ext: "ris", tipo: "application/x-research-info-systems" } };
 
@@ -533,13 +555,6 @@ function baixar(texto, nome, formato) {
   a.href = url; a.download = `${nome}.${EXPORTACOES[formato].ext}`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
-}
-
-/* Acervo completo: junta as citações de todos os itens */
-function exportar(botao) {
-  const formato = botao.dataset.formato;
-  const texto = OBRAS.map(o => o[formato]).filter(Boolean).join("\n\n");
-  if (texto) baixar(texto, "acervo-antc", formato);
 }
 
 function carregar(items, colecoes, origem) {
@@ -552,7 +567,15 @@ function carregar(items, colecoes, origem) {
 
 async function iniciar() {
   $("lnk-sugestao").href = CONFIG.linkSugestao;
-  ["exp-bibtex", "exp-ris"].forEach(id => ($(id).onclick = () => exportar($(id))));
+  /* Botão de indicação: aponta para o formulário quando CONFIG.linkIndicacao estiver preenchido */
+  const indicar = $("lnk-indicar");
+  if (CONFIG.linkIndicacao) indicar.href = CONFIG.linkIndicacao;
+  else {
+    indicar.setAttribute("aria-disabled", "true");
+    indicar.removeAttribute("target");
+    indicar.title = "Formulário de indicação em preparação";
+    indicar.onclick = (e) => e.preventDefault();
+  }
   [...FILTROS, "f-ordem"].forEach(id => $(id).addEventListener("input", atualizar));
   $("limpar").onclick = () => { FILTROS.forEach(id => ($(id).value = "")); atualizar(); };
   /* Link com filtro aberto na mesma aba (só o "#…" muda): reaplica o filtro */

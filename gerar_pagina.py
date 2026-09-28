@@ -31,6 +31,8 @@ CONFIG = {
     "tagsIgnoradas": ["lido", "a revisar", "a ler"],
     # Destino de "Sugira a inclusão" (trocar pelo formulário quando existir)
     "linkSugestao": "https://www.antcbrasil.org.br/contato",
+    # Formulário do botão "Indicar material para o acervo" (vazio: botão aparece inativo)
+    "linkIndicacao": "",
     # Oculta resumos que começam com "[Resumo gerado por IA"
     "ocultarResumosIA": True,
 }
