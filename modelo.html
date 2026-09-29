@@ -52,6 +52,7 @@
   .pilula.cheia:hover { background: #ffc12e; }
   .pilula.contorno { border: 2px solid rgba(255,255,255,.55); color: #fff; background: none; font-family: inherit; cursor: pointer; }
   .pilula.contorno:hover { border-color: #fff; }
+  .pilula[hidden] { display: none; }
 
   /* Filtros */
   .painel { background: var(--superficie); border: 1px solid var(--linha); border-radius: 10px; padding: 16px; margin-top: -18px; position: relative; box-shadow: 0 6px 18px rgba(40, 40, 91, .08); }
@@ -140,6 +141,7 @@
     <p class="nota">As referências apontam para o local de publicação original. O acesso ao texto completo segue as condições de cada fonte, como editoras, periódicos, repositórios institucionais e portais de notícias.</p>
     <div class="acoes">
       <a class="pilula cheia" id="lnk-indicar" href="#" target="_blank" rel="noopener">Indicar material para o acervo</a>
+      <a class="pilula contorno" id="lnk-novidades" href="#" target="_blank" rel="noopener" hidden>Receber novidades por e-mail</a>
     </div>
   </div>
 </header>
@@ -717,6 +719,8 @@ async function iniciar() {
     indicar.title = "Formulário de indicação em preparação";
     indicar.onclick = (e) => e.preventDefault();
   }
+  /* Cadastro para avisos de novos itens por e-mail (oculto enquanto CONFIG.linkNovidades estiver vazio) */
+  if (CONFIG.linkNovidades) { $("lnk-novidades").href = CONFIG.linkNovidades; $("lnk-novidades").hidden = false; }
   [...FILTROS, "f-ordem"].forEach(id => $(id).addEventListener("input", atualizar));
   $("limpar").onclick = () => { FILTROS.forEach(id => ($(id).value = "")); atualizar(); };
   /* Link com filtro aberto na mesma aba (só o "#…" muda): reaplica o filtro */

@@ -32,10 +32,13 @@ CONFIG = {
     "modo": "auto",
     # Tags de controle interno que não devem aparecer como tema
     "tagsIgnoradas": ["lido", "a revisar", "a ler"],
-    # Destino de "Sugira a inclusão" (trocar pelo formulário quando existir)
-    "linkSugestao": "https://www.antcbrasil.org.br/contato",
-    # Formulário do botão "Indicar material para o acervo" (vazio: botão aparece inativo)
-    "linkIndicacao": "",
+    # Formulário Google de indicação de material (criado por formulario_indicacao.gs):
+    # usado pelo botão "Indicar material para o acervo" e pelo link "Sugira a inclusão" do rodapé
+    "linkSugestao": "https://docs.google.com/forms/d/e/1FAIpQLScNdkcylfrf1bIoa49-aoKrQTLluhIGPixzs4jtyPJYMAsR5Q/viewform",
+    "linkIndicacao": "https://docs.google.com/forms/d/e/1FAIpQLScNdkcylfrf1bIoa49-aoKrQTLluhIGPixzs4jtyPJYMAsR5Q/viewform",
+    # Formulário de cadastro para avisos de novos itens por e-mail (criado por assinatura_novidades.gs);
+    # vazio: o botão "Receber novidades por e-mail" não aparece
+    "linkNovidades": "https://docs.google.com/forms/d/e/1FAIpQLSe9fV_Q-6Np7u1JskGjuly7UJ0S4kIQXekrZQO28gufMVC-PQ/viewform",
     # Oculta resumos que começam com "[Resumo gerado por IA"
     "ocultarResumosIA": True,
 }
