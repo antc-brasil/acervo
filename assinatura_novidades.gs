@@ -6,6 +6,9 @@
  *   itens ADICIONADOS desde a última verificação (edições de itens antigos não geram aviso).
  *   Semana sem novidade, nenhum e-mail sai.
  * - Cada e-mail traz um link de cancelamento de inscrição (app da Web deste mesmo projeto).
+ * - O mesmo app da Web serve o feed RSS do acervo em URL_APP_WEB + '?feed=rss'
+ *   (30 itens mais recentes, por data de inclusão). Depois de alterar o código, publique em
+ *   Implantar > Gerenciar implantações > editar > Versão: Nova versão (a URL não muda).
  *
  * Instalação (uma vez):
  *   1. Novo projeto em https://script.google.com; cole este arquivo e salve.
@@ -112,6 +115,7 @@ function aoCadastrar(e) {
 }
 
 function doGet(e) {
+  if (e.parameter.feed !== undefined) return feedRss();
   const email = String(e.parameter.e || '').toLowerCase();
   const token = String(e.parameter.t || '');
   const valido = email && token === assinatura(email);
@@ -135,6 +139,63 @@ function cancelarInscricao(email, token) {
   const linha = localizar(aba, email);
   if (linha) aba.getRange(linha, 4, 1, 2).setValues([['Cancelado', new Date()]]);
   return 'Inscrição cancelada. Você não receberá mais e-mails do Acervo ANTC.';
+}
+
+// ======================= Feed RSS =======================
+
+const FEED_ITENS = 30;
+
+function feedRss() {
+  // Cache de 1 hora: leitores de feed consultam com frequência; o Zotero é consultado no máximo 1x/hora
+  const cache = CacheService.getScriptCache();
+  let xml = cache.get('feed');
+  if (!xml) {
+    xml = montarFeed();
+    if (xml.length < 100000) cache.put('feed', xml, 3600);
+  }
+  return ContentService.createTextOutput(xml).setMimeType(ContentService.MimeType.RSS);
+}
+
+function montarFeed() {
+  const { dados } = buscarZotero(`items/top?include=data,bib&style=${ESTILO}&locale=pt-BR` +
+    `&sort=dateAdded&direction=desc&limit=${FEED_ITENS}`);
+  const cdata = s => '<![CDATA[' + String(s).replace(/]]>/g, ']]]]><![CDATA[>') + ']]>';
+  const itens = dados.map(i => {
+    const d = i.data;
+    const link = d.DOI ? 'https://doi.org/' + d.DOI : (d.url || PAGINA);
+    const auditores = lerAuditores(d.extra);
+    const autores = (d.creators || []).filter(c => c.creatorType === 'author')
+      .map(c => c.name || [c.firstName, c.lastName].filter(Boolean).join(' '));
+    const corpo =
+      `<p><strong>${esc(tipo(d))}${ano(i) ? ' · ' + ano(i) : ''}</strong></p>` +
+      (auditores.length ? `<p>${auditores.length > 1 ? 'Auditores' : 'Auditor(a)'}: ` +
+        auditores.map(a => `${esc(a.nome)} (${esc(a.tribunal)})`).join('; ') + '</p>' : '') +
+      referencia(i.bib);
+    return ['    <item>',
+      `      <title>${esc(d.title || 'Sem título')}</title>`,
+      `      <link>${esc(link)}</link>`,
+      `      <guid isPermaLink="false">acervo-antc-${i.key}</guid>`,
+      `      <pubDate>${new Date(d.dateAdded).toUTCString()}</pubDate>`,
+      ...autores.map(a => `      <dc:creator>${esc(a)}</dc:creator>`),
+      `      <category>${esc(tipo(d))}</category>`,
+      ...(d.tags || []).map(t => `      <category>${esc(t.tag)}</category>`),
+      `      <description>${cdata(corpo)}</description>`,
+      '    </item>'].join('\n');
+  }).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Acervo ANTC — Novidades</title>
+    <link>${esc(PAGINA)}</link>
+    <atom:link href="${esc(URL_APP_WEB + '?feed=rss')}" rel="self" type="application/rss+xml"/>
+    <description>Novos itens do Acervo ANTC: a produção bibliográfica dos Auditores de Controle Externo reunida em um só lugar.</description>
+    <language>pt-BR</language>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <ttl>360</ttl>
+${itens}
+  </channel>
+</rss>
+`;
 }
 
 // ======================= Envio semanal =======================

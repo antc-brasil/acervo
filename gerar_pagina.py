@@ -39,6 +39,8 @@ CONFIG = {
     # Formulário de cadastro para avisos de novos itens por e-mail (criado por assinatura_novidades.gs);
     # vazio: o botão "Receber novidades por e-mail" não aparece
     "linkNovidades": "https://docs.google.com/forms/d/e/1FAIpQLSe9fV_Q-6Np7u1JskGjuly7UJ0S4kIQXekrZQO28gufMVC-PQ/viewform",
+    # Feed RSS servido pelo app da Web de assinatura_novidades.gs; vazio: o link "Assinar via RSS" não aparece
+    "linkFeed": "https://script.google.com/macros/s/AKfycbzAz3E573cwzK23obO0qjO2tqkl-NDdJkzmJcrwCiSzs6nVULGeTIuugntY05y5qkSE/exec?feed=rss",
     # Oculta resumos que começam com "[Resumo gerado por IA"
     "ocultarResumosIA": True,
 }
@@ -105,6 +107,10 @@ def main() -> None:
     html = (AQUI / "modelo.html").read_text(encoding="utf-8")
     html = html.replace("/*__CONFIG__*/{}", js(CONFIG), 1)
     html = html.replace('/*__SNAPSHOT__*/{"items": [], "collections": [], "geradoEm": ""}', js(snapshot), 1)
+    # Descoberta automática do feed pelos leitores de RSS
+    if CONFIG.get("linkFeed"):
+        html = html.replace("</title>", '</title>\n<link rel="alternate" type="application/rss+xml" '
+                            f'title="Acervo ANTC — Novidades" href="{CONFIG["linkFeed"]}">', 1)
     destino.write_text(html, encoding="utf-8")
     # Aviso para a curadoria: obras sem Auditor(a) identificado no campo Extra
     padrao = re.compile(r"^[^:()]+?\s*\([^():]+\)$")

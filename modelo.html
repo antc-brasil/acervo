@@ -142,6 +142,8 @@
     <div class="acoes">
       <a class="pilula cheia" id="lnk-indicar" href="#" target="_blank" rel="noopener">Indicar material para o acervo</a>
       <a class="pilula contorno" id="lnk-novidades" href="#" target="_blank" rel="noopener" hidden>Receber novidades por e-mail</a>
+      <a class="pilula contorno" id="lnk-feed" href="#" target="_blank" rel="noopener" hidden
+         title="Copia o endereço do feed para colar no seu leitor de RSS">Assinar via RSS</a>
     </div>
   </div>
 </header>
@@ -721,6 +723,21 @@ async function iniciar() {
   }
   /* Cadastro para avisos de novos itens por e-mail (oculto enquanto CONFIG.linkNovidades estiver vazio) */
   if (CONFIG.linkNovidades) { $("lnk-novidades").href = CONFIG.linkNovidades; $("lnk-novidades").hidden = false; }
+  /* Feed RSS: o clique copia o endereço (aberto no navegador, o feed é só XML) */
+  if (CONFIG.linkFeed) {
+    const feed = $("lnk-feed");
+    feed.href = CONFIG.linkFeed;
+    feed.hidden = false;
+    feed.onclick = async (e) => {
+      e.preventDefault();
+      let ok = false;
+      try { await navigator.clipboard.writeText(CONFIG.linkFeed); ok = true; } catch {}
+      if (!ok) ok = copiarPorSelecao(CONFIG.linkFeed, feed.parentElement);
+      if (!ok) return;
+      feed.textContent = "Endereço do feed copiado";
+      setTimeout(() => (feed.textContent = "Assinar via RSS"), 2500);
+    };
+  }
   [...FILTROS, "f-ordem"].forEach(id => $(id).addEventListener("input", atualizar));
   $("limpar").onclick = () => { FILTROS.forEach(id => ($(id).value = "")); atualizar(); };
   /* Link com filtro aberto na mesma aba (só o "#…" muda): reaplica o filtro */
