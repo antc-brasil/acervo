@@ -277,7 +277,7 @@ function moldura(conteudo, email) {
   return `<div style="background:#f3f3f7;padding:24px 12px;font-family:Lato,'Segoe UI',Arial,sans-serif;color:#252525;font-size:15px;line-height:1.6">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;margin:0 auto;background:#fff;border:1px solid #e0e0ea;border-radius:10px;overflow:hidden">
     <tr><td style="background:#28285b;border-bottom:4px solid #f7ad03;padding:20px 24px">
-      <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#c9c9e3">ANTC · Auditores de Controle Externo</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#c9c9e3">ANTC · Auditor forte, controle externo forte</div>
       <div style="font-size:24px;font-weight:900;text-transform:uppercase;color:#fff"><span style="color:#f7ad03">Acervo</span> ANTC</div>
     </td></tr>
     <tr><td style="padding:20px 24px">${conteudo}</td></tr>

@@ -136,15 +136,13 @@
 <body>
 <header class="faixa">
   <div class="conteudo">
-    <p class="sobretitulo">ANTC · Auditores de Controle Externo</p>
+    <p class="sobretitulo">ANTC · Auditor forte, controle externo forte</p>
     <h1><span>Acervo</span> ANTC</h1>
     <p class="lead">A produção bibliográfica dos Auditores de Controle Externo reunida em um só lugar: livros, capítulos, artigos, teses, dissertações e outras publicações. O conhecimento gerado pela carreira ao seu alcance.</p>
     <p class="nota">As referências apontam para o local de publicação original. O acesso ao texto completo segue as condições de cada fonte, como editoras, periódicos, repositórios institucionais e portais de notícias.</p>
     <div class="acoes">
       <a class="pilula cheia" id="lnk-indicar" href="#" target="_blank" rel="noopener">Indicar material para o acervo</a>
       <a class="pilula contorno" id="lnk-novidades" href="#" target="_blank" rel="noopener" hidden>Receber novidades por e-mail</a>
-      <a class="pilula contorno" id="lnk-feed" href="#" target="_blank" rel="noopener" hidden
-         title="Copia o endereço do feed para colar no seu leitor de RSS">Assinar via RSS</a>
     </div>
   </div>
 </header>
@@ -192,7 +190,9 @@
   <div class="conteudo">
     <span id="origem"></span>
     <span>Mantido pela curadoria da ANTC.
-      Conhece um item que deveria estar aqui? <a id="lnk-sugestao" href="#" target="_blank" rel="noopener">Sugira a inclusão</a>.</span>
+      Conhece um item que deveria estar aqui? <a id="lnk-sugestao" href="#" target="_blank" rel="noopener">Sugira a inclusão</a>.
+      <span id="rodape-feed" hidden>Acompanhe as novidades pelo <a id="lnk-feed" href="#" target="_blank" rel="noopener"
+        title="Copia o endereço do feed para colar no seu leitor de RSS">feed RSS</a>.</span></span>
   </div>
 </footer>
 
@@ -728,15 +728,15 @@ async function iniciar() {
   if (CONFIG.linkFeed) {
     const feed = $("lnk-feed");
     feed.href = CONFIG.linkFeed;
-    feed.hidden = false;
+    $("rodape-feed").hidden = false;
     feed.onclick = async (e) => {
       e.preventDefault();
       let ok = false;
       try { await navigator.clipboard.writeText(CONFIG.linkFeed); ok = true; } catch {}
       if (!ok) ok = copiarPorSelecao(CONFIG.linkFeed, feed.parentElement);
       if (!ok) return;
-      feed.textContent = "Endereço do feed copiado";
-      setTimeout(() => (feed.textContent = "Assinar via RSS"), 2500);
+      feed.textContent = "feed RSS (endereço copiado)";
+      setTimeout(() => (feed.textContent = "feed RSS"), 2500);
     };
   }
   [...FILTROS, "f-ordem"].forEach(id => $(id).addEventListener("input", atualizar));
