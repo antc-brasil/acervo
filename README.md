@@ -28,12 +28,14 @@ python3 gerar_pagina.py            # gera acervo.html
    nenhum outro repositório possa usar o subdomínio. O GitHub informa um registro TXT.
 4. **DNS de antcbrasil.org.br** (pedido à Trídia ou a quem administra a zona):
 
-   | Tipo  | Nome                                      | Valor                     |
-   |-------|-------------------------------------------|---------------------------|
-   | CNAME | `acervo`                                  | `antc-brasil.github.io.`   |
-   | TXT   | `_github-pages-challenge-antc-brasil` (*)  | código informado no passo 3 |
+   | Tipo  | Nome                                             | Valor                            |
+   |-------|--------------------------------------------------|----------------------------------|
+   | CNAME | `acervo`                                         | `antc-brasil.github.io.`         |
+   | TXT   | `_github-pages-challenge-antc-brasil.acervo`     | `162f2c28c1d40d3f1939cea79ce12d` |
 
-   (*) nome exato informado pelo GitHub no passo 3.
+   Com os registros no ar, clicar em **Verify** na verificação do domínio e só então
+   preencher o *Custom domain* do passo 2 (antes disso, o endereço provisório
+   https://antc-brasil.github.io/acervo/ deixaria de abrir).
 5. **Site da ANTC:** botão, guia ou banner "Acervo ANTC" com link para
    `https://acervo.antcbrasil.org.br/`.
 6. **Apps Script:** trocar a constante `PAGINA` de `assinatura_novidades.gs` pelo endereço oficial
