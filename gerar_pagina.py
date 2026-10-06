@@ -34,13 +34,13 @@ CONFIG = {
     "tagsIgnoradas": ["lido", "a revisar", "a ler"],
     # Formulário Google de indicação de material (criado por formulario_indicacao.gs):
     # usado pelo botão "Indicar material para o acervo" e pelo link "Sugira a inclusão" do rodapé
-    "linkSugestao": "https://docs.google.com/forms/d/e/1FAIpQLScNdkcylfrf1bIoa49-aoKrQTLluhIGPixzs4jtyPJYMAsR5Q/viewform",
-    "linkIndicacao": "https://docs.google.com/forms/d/e/1FAIpQLScNdkcylfrf1bIoa49-aoKrQTLluhIGPixzs4jtyPJYMAsR5Q/viewform",
+    "linkSugestao": "https://docs.google.com/forms/d/e/1FAIpQLSf0FiBEJYjNNkqbzx_rdU-mSZHbHyH_qsfLBJQ1hIKZXNBizA/viewform",
+    "linkIndicacao": "https://docs.google.com/forms/d/e/1FAIpQLSf0FiBEJYjNNkqbzx_rdU-mSZHbHyH_qsfLBJQ1hIKZXNBizA/viewform",
     # Formulário de cadastro para avisos de novos itens por e-mail (criado por assinatura_novidades.gs);
     # vazio: o botão "Receber novidades por e-mail" não aparece
-    "linkNovidades": "https://docs.google.com/forms/d/e/1FAIpQLSe9fV_Q-6Np7u1JskGjuly7UJ0S4kIQXekrZQO28gufMVC-PQ/viewform",
+    "linkNovidades": "https://docs.google.com/forms/d/e/1FAIpQLSfLgRp2XqHU-KQyRWUn_qWPHVsooTd79CjO7GlX10EOz6oLWQ/viewform",
     # Feed RSS servido pelo app da Web de assinatura_novidades.gs; vazio: o link "Assinar via RSS" não aparece
-    "linkFeed": "https://script.google.com/macros/s/AKfycbzAz3E573cwzK23obO0qjO2tqkl-NDdJkzmJcrwCiSzs6nVULGeTIuugntY05y5qkSE/exec?feed=rss",
+    "linkFeed": "https://script.google.com/macros/s/AKfycbwD40aP4oFWycKv4_uPhAHNTUs2RQ1MaS7i5Tb39ho4JJVHRZM-akvmHFhhgFiqSVxQ5Q/exec?feed=rss",
     # Oculta resumos que começam com "[Resumo gerado por IA"
     "ocultarResumosIA": True,
 }

@@ -18,16 +18,20 @@
  *      (use em CONFIG.linkNovidades no gerar_pagina.py).
  *   Para ver como fica o e-mail: execute testarEnvio() (manda só para você os 3 itens mais recentes).
  *
- * Limite do Gmail pessoal: 100 destinatários/dia (Google Workspace: 1.500).
+ * Limite de envio: 1.500 destinatários/dia na conta Google Workspace da ANTC (Gmail pessoal: 100).
  */
 const GROUP_ID = 6584175;
 const ESTILO = 'associacao-brasileira-de-normas-tecnicas-ufrgs';
-// Página do acervo (trocar pela URL oficial quando publicada em antcbrasil.org.br)
-const PAGINA = 'https://claude.ai/artifact/UTn7e7tV1rqNkD5Z4jKsjB';
+// Página do acervo (trocar por https://acervo.antcbrasil.org.br/ quando o domínio estiver no ar)
+const PAGINA = 'https://antc-brasil.github.io/acervo/';
 // URL /exec da implantação "App da Web" deste projeto (passo 2)
-const URL_APP_WEB = 'https://script.google.com/macros/s/AKfycbzAz3E573cwzK23obO0qjO2tqkl-NDdJkzmJcrwCiSzs6nVULGeTIuugntY05y5qkSE/exec';
+const URL_APP_WEB = 'https://script.google.com/macros/s/AKfycbwD40aP4oFWycKv4_uPhAHNTUs2RQ1MaS7i5Tb39ho4JJVHRZM-akvmHFhhgFiqSVxQ5Q/exec';
 const FUSO = 'America/Sao_Paulo';
 const REMETENTE = 'Acervo ANTC';
+// Endereço de envio: apelido (alias) da conta que executa o script, cadastrado no Gmail em
+// Configurações > Contas > "Enviar e-mail como". Enquanto não estiver lá, o e-mail sai do
+// endereço da própria conta, com resposta direcionada a este endereço.
+const EMAIL_REMETENTE = 'acervo@antcbrasil.org.br';
 
 const TIPOS = {
   journalArticle: 'Artigo de periódico', book: 'Livro', bookSection: 'Capítulo de livro',
@@ -52,6 +56,8 @@ function configurar() {
     'Nas semanas sem novidades, nenhum e-mail é enviado. Você pode cancelar a inscrição a qualquer momento ' +
     'pelo link presente em cada mensagem.');
   form.setCollectEmail(false);
+  // Conta Google Workspace: sem isto, só usuários do domínio da ANTC conseguem responder
+  form.setRequireLogin(false);
   form.setConfirmationMessage(
     'Inscrição recebida! Enviamos uma confirmação para o seu e-mail. ' +
     'Se não a encontrar, verifique a caixa de spam.');
@@ -269,8 +275,12 @@ function buscarZotero(caminho) {
   return { versao, dados: caminho.includes('format=keys') ? corpo.split('\n').filter(Boolean) : JSON.parse(corpo) };
 }
 
+let usarApelido; // consultado uma vez por execução
 function enviar(email, assunto, html, texto) {
-  MailApp.sendEmail({ to: email, subject: assunto, htmlBody: html, body: texto, name: REMETENTE });
+  if (usarApelido === undefined) usarApelido = GmailApp.getAliases().includes(EMAIL_REMETENTE);
+  const opcoes = { htmlBody: html, name: REMETENTE, replyTo: EMAIL_REMETENTE };
+  if (usarApelido) GmailApp.sendEmail(email, assunto, texto, { ...opcoes, from: EMAIL_REMETENTE });
+  else MailApp.sendEmail({ to: email, subject: assunto, body: texto, ...opcoes });
 }
 
 function moldura(conteudo, email) {

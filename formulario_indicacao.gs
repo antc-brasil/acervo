@@ -21,6 +21,8 @@ function criarFormulario() {
     'O acervo reúne apenas as referências e o link para a publicação original; não hospedamos arquivos.\n\n' +
     'Tempo estimado: 3 minutos. Se a obra tiver DOI ou ISBN, os demais dados da publicação são opcionais.');
   form.setCollectEmail(true);
+  // Conta Google Workspace: sem isto, só usuários do domínio da ANTC conseguem responder
+  form.setRequireLogin(false);
   form.setAllowResponseEdits(false);
   form.setLimitOneResponsePerUser(false);
   form.setProgressBar(true);
