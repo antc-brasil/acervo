@@ -187,7 +187,8 @@
 
 <footer>
   <div class="conteudo">
-    <span id="origem"></span>
+    <span>© <span id="ano">2026</span> ANTC.
+      Os direitos sobre as obras catalogadas pertencem aos respectivos autores e editoras.</span>
     <span>Mantido pela curadoria da ANTC.
       Conhece um item que deveria estar aqui? <a id="lnk-sugestao" href="#" target="_blank" rel="noopener">Sugira a inclusão</a>.
       <span id="rodape-feed" hidden>Acompanhe as novidades pelo <a id="lnk-feed" href="#" target="_blank" rel="noopener"
@@ -702,15 +703,17 @@ function baixar(texto, nome, formato) {
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
-function carregar(items, colecoes, origem) {
+function carregar(items, colecoes) {
   OBRAS = normalizar(items, colecoes);
   montarFiltros();
   lerEstado();
   render();
-  $("origem").textContent = origem;
 }
 
 async function iniciar() {
+  /* Copyright: 2026 no primeiro ano, depois "2026–<ano atual>" */
+  const ano = new Date().getFullYear();
+  if (ano > 2026) $("ano").textContent = `2026–${ano}`;
   $("lnk-sugestao").href = CONFIG.linkSugestao;
   /* Botão de indicação: aponta para o formulário quando CONFIG.linkIndicacao estiver preenchido */
   const indicar = $("lnk-indicar");
@@ -744,7 +747,7 @@ async function iniciar() {
   window.addEventListener("hashchange", () => { lerEstado(); render(); });
 
   const snap = SNAPSHOT.items.length;
-  if (snap) carregar(SNAPSHOT.items, SNAPSHOT.collections, `Atualizado em ${SNAPSHOT.geradoEm}.`);
+  if (snap) carregar(SNAPSHOT.items, SNAPSHOT.collections);
   else render();
 
   if (CONFIG.modo === "estatico") return;
@@ -755,7 +758,7 @@ async function iniciar() {
     ]);
     const citacoes = Object.fromEntries(SNAPSHOT.items.map(i => [i.key, i.citacoes || {}]));
     items.forEach(i => (i.citacoes = citacoes[i.key] || {}));
-    carregar(items, cols.map(c => ({ key: c.key, name: c.data.name })), "Atualizado em tempo real.");
+    carregar(items, cols.map(c => ({ key: c.key, name: c.data.name })));
   } catch (e) {
     /* Consulta bloqueada (ex.: política de segurança do site) ou indisponível: mantém a cópia embutida */
     if (!snap) { $("lista").replaceChildren(); $("contagem").textContent = "Não foi possível carregar o acervo agora."; }
