@@ -2,10 +2,10 @@
 """Gera acervo.html a partir da biblioteca pública do grupo Zotero da ANTC.
 
 A página resultante é um arquivo único (HTML + CSS + JS inline; a fonte Lato do
-Google Fonts é opcional e cai para fontes do sistema se bloqueada), compatível com a CSP atual do site da ANTC
-(`default-src 'self' 'unsafe-inline'`). Ela traz uma cópia dos dados embutida
-e, se a CSP do site passar a permitir `connect-src https://api.zotero.org`,
-atualiza-se sozinha a cada visita.
+Google Fonts é opcional e cai para fontes do sistema se bloqueada), publicada no
+GitHub Pages em https://acervo.antcbrasil.org.br/ por .github/workflows/publicar.yml.
+Ela traz uma cópia dos dados embutida e, ao abrir, atualiza-se pela API do Zotero;
+se a consulta falhar, fica com a cópia.
 
 Uso:
     python3 gerar_pagina.py            # gera acervo.html ao lado deste script
