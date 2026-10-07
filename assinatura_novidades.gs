@@ -30,7 +30,7 @@ const FUSO = 'America/Sao_Paulo';
 const REMETENTE = 'Acervo ANTC';
 // Endereço de envio: apelido (alias) da conta que executa o script, cadastrado no Gmail em
 // Configurações > Contas > "Enviar e-mail como". Enquanto não estiver lá, o e-mail sai do
-// endereço da própria conta, com resposta direcionada a este endereço.
+// endereço da própria conta (sem replyTo, para respostas não irem a um endereço inexistente).
 const EMAIL_REMETENTE = 'acervo@antcbrasil.org.br';
 
 const TIPOS = {
@@ -278,7 +278,7 @@ function buscarZotero(caminho) {
 let usarApelido; // consultado uma vez por execução
 function enviar(email, assunto, html, texto) {
   if (usarApelido === undefined) usarApelido = GmailApp.getAliases().includes(EMAIL_REMETENTE);
-  const opcoes = { htmlBody: html, name: REMETENTE, replyTo: EMAIL_REMETENTE };
+  const opcoes = { htmlBody: html, name: REMETENTE };
   if (usarApelido) GmailApp.sendEmail(email, assunto, texto, { ...opcoes, from: EMAIL_REMETENTE });
   else MailApp.sendEmail({ to: email, subject: assunto, body: texto, ...opcoes });
 }
