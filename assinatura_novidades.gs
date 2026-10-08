@@ -86,14 +86,29 @@ function configurar() {
     dataCorte: new Date().toISOString()
   });
 
-  ScriptApp.newTrigger('aoCadastrar').forForm(form).onFormSubmit().create();
-  ScriptApp.newTrigger('verificarNovidades').timeBased()
-    .onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(8).inTimezone(FUSO).create();
+  criarGatilhos(form);
 
   Logger.log('Link público do formulário (CONFIG.linkNovidades): ' + form.getPublishedUrl());
   Logger.log('Editar o formulário: ' + form.getEditUrl());
   Logger.log('Planilha de inscritos: ' + planilha.getUrl());
   if (!URL_APP_WEB) Logger.log('ATENÇÃO: preencha URL_APP_WEB (passo 2) antes do primeiro envio.');
+}
+
+/**
+ * Recria os gatilhos na conta de quem executa (gatilhos pertencem a uma pessoa, não ao projeto):
+ * use depois de transferir o projeto para outra conta. Os gatilhos da conta anterior devem ser
+ * apagados por ela, em Acionadores.
+ */
+function recriarGatilhos() {
+  ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
+  criarGatilhos(FormApp.openById(props().getProperty('formId')));
+  Logger.log('Gatilhos recriados para ' + Session.getEffectiveUser().getEmail());
+}
+
+function criarGatilhos(form) {
+  ScriptApp.newTrigger('aoCadastrar').forForm(form).onFormSubmit().create();
+  ScriptApp.newTrigger('verificarNovidades').timeBased()
+    .onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(8).inTimezone(FUSO).create();
 }
 
 // ======================= Cadastro e cancelamento =======================
