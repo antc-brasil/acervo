@@ -132,8 +132,10 @@
 
   footer { margin-top: 40px; background: var(--marinho); color: #c9c9e3; font-size: .85rem; }
   footer .conteudo { padding-block: 20px; display: flex; flex-wrap: wrap; gap: 6px 24px; justify-content: space-between; }
-  footer .conteudo > span:last-child { max-width: 68ch; }
   footer a { color: #fff; }
+  /* Cada frase só quebra por dentro se não couber inteira na linha */
+  footer .frase:not([hidden]) { display: inline-block; }
+  footer .voltar-rodape { flex-basis: 100%; }
 </style>
 </head>
 <body>
@@ -194,10 +196,11 @@
   <div class="conteudo">
     <span>© <span id="ano">2026</span> ANTC.
       Os direitos sobre as obras catalogadas pertencem aos respectivos autores e editoras.</span>
-    <span>Mantido pela curadoria da ANTC.
-      Conhece um item que deveria estar aqui? <a id="lnk-sugestao" href="#" target="_blank" rel="noopener">Sugira a inclusão</a>.
-      <span id="rodape-feed" hidden>Acompanhe as novidades pelo <a id="lnk-feed" href="#" target="_blank" rel="noopener"
+    <span><span class="frase">Mantido pela curadoria da ANTC.</span>
+      <span class="frase">Conhece um item que deveria estar aqui? <a id="lnk-sugestao" href="#" target="_blank" rel="noopener">Sugira a inclusão</a>.</span>
+      <span class="frase" id="rodape-feed" hidden>Acompanhe as novidades pelo <a id="lnk-feed" href="#" target="_blank" rel="noopener"
         title="Copia o endereço do feed para colar no seu leitor de RSS">feed RSS</a>.</span></span>
+    <span class="voltar-rodape"><a href="https://www.antcbrasil.org.br/">← Voltar ao site da ANTC</a></span>
   </div>
 </footer>
 

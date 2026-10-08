@@ -16,6 +16,7 @@ publicado em **https://acervo.antcbrasil.org.br/**.
 
 ```bash
 python3 gerar_pagina.py            # gera acervo.html
+python3 gerar_previa.py acervo.html /tmp/acervo-previa.html   # versão para o Artifact de prévia
 ```
 
 ## Implantação (uma única vez)
