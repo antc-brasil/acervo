@@ -40,6 +40,9 @@
   /* Faixa de abertura, no marinho da barra de menu do site */
   .faixa { background: var(--marinho); color: #fff; border-bottom: 4px solid var(--ambar); }
   .faixa .conteudo { padding-block: 36px 32px; }
+  /* Volta ao site da ANTC (o acervo fica em subdomínio próprio) */
+  .voltar { display: inline-block; margin: -16px 0 18px; font-size: .88rem; color: #c9c9e3; text-decoration: none; }
+  .voltar:hover, .voltar:focus-visible { color: #fff; text-decoration: underline; }
   .sobretitulo { margin: 0 0 10px; font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #c9c9e3; }
   .faixa h1 { margin: 0; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.1; font-weight: 900; text-transform: uppercase; letter-spacing: .01em; text-wrap: balance; }
   .faixa h1 span { color: var(--ambar); }
@@ -135,6 +138,7 @@
 <body>
 <header class="faixa">
   <div class="conteudo">
+    <a class="voltar" href="https://www.antcbrasil.org.br/">← Voltar ao site da ANTC</a>
     <p class="sobretitulo">ANTC · Auditor forte, controle externo forte</p>
     <h1><span>Acervo</span> ANTC</h1>
     <p class="lead">A produção bibliográfica dos Auditores de Controle Externo reunida em um só lugar: livros, capítulos, artigos, teses, dissertações e outras publicações. O conhecimento gerado pela carreira ao seu alcance.</p>
