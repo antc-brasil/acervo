@@ -41,3 +41,6 @@ python3 gerar_previa.py acervo.html /tmp/acervo-previa.html   # versão para o A
    `https://acervo.antcbrasil.org.br/`.
 6. **Apps Script:** trocar a constante `PAGINA` de `assinatura_novidades.gs` pelo endereço oficial
    e publicar nova versão do app da Web.
+
+Situação em 14/10/2026: DNS criado pela Trídia, domínio verificado, *Custom domain* e HTTPS ativos,
+`PAGINA` trocada (app da Web versão 4). Falta só o botão no site da ANTC (passo 5).

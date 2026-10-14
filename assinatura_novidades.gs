@@ -22,8 +22,8 @@
  */
 const GROUP_ID = 6584175;
 const ESTILO = 'associacao-brasileira-de-normas-tecnicas-ufrgs';
-// Página do acervo (trocar por https://acervo.antcbrasil.org.br/ quando o domínio estiver no ar)
-const PAGINA = 'https://antc-brasil.github.io/acervo/';
+// Página do acervo
+const PAGINA = 'https://acervo.antcbrasil.org.br/';
 // URL /exec da implantação "App da Web" deste projeto (passo 2)
 const URL_APP_WEB = 'https://script.google.com/macros/s/AKfycbwD40aP4oFWycKv4_uPhAHNTUs2RQ1MaS7i5Tb39ho4JJVHRZM-akvmHFhhgFiqSVxQ5Q/exec';
 const FUSO = 'America/Sao_Paulo';
