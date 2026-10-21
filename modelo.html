@@ -295,9 +295,18 @@ function normalizar(raw, colecoes) {
   });
 }
 
+/* A data de acesso é de quem cita, não da curadoria: sai de todos os formatos
+   (ABNT/IEEE "Acesso em: …", Harvard "(Acesso em: …)", Vancouver "[citado …]") */
+function semAcesso(html) {
+  return html
+    .replace(/ ?\(Acesso em:[^)]*\)/g, "")
+    .replace(/ ?\[citado [^\]]*\]/g, "")
+    .replace(/ ?Acesso em: [^<]*?\d{4}\./g, "");
+}
+
 /* Mantém só texto e ênfases da referência formatada pelo Zotero */
 function refSegura(html) {
-  const doc = new DOMParser().parseFromString(html, "text/html");
+  const doc = new DOMParser().parseFromString(semAcesso(html), "text/html");
   const alvo = doc.querySelector(".csl-entry") || doc.body;
   alvo.querySelectorAll(".csl-left-margin").forEach(n => n.remove());
   const saida = document.createElement("p");
@@ -372,14 +381,6 @@ function destacar(ref, nomes) {
       break;
     }
   });
-}
-
-/* "Acesso em" deve ser a data de quem cita, não a da curadoria: na cópia, vira a data de hoje */
-const MESES = ["jan.", "fev.", "mar.", "abr.", "maio", "jun.", "jul.", "ago.", "set.", "out.", "nov.", "dez."];
-function comAcessoHoje(txt) {
-  const h = new Date();
-  const hoje = `${h.getDate()} ${MESES[h.getMonth()]} ${h.getFullYear()}`;
-  return txt.replace(/Acesso em: \d{1,2}º? \p{L}+\.? \d{4}/u, "Acesso em: " + hoje);
 }
 
 /* Alternativa quando o navegador recusa a área de transferência */
@@ -480,7 +481,6 @@ function comoCitar(o) {
   cab.append(tit, est);
   const corpo = document.createElement("div");
   corpo.className = "citar-corpo";
-  let estilo = "ABNT";
   let ref = refABNT(o);
   corpo.appendChild(ref);
   const mostrar = async (nome) => {
@@ -488,7 +488,7 @@ function comoCitar(o) {
     if (nome !== "ABNT" && !html) { est.textContent = nome + " indisponível"; return; }
     const novo = nome === "ABNT" ? refABNT(o) : refSegura(html);
     if (nome !== "ABNT") destacar(novo, o.destaquesOutros);
-    ref.replaceWith(novo); ref = novo; estilo = nome; est.textContent = nome;
+    ref.replaceWith(novo); ref = novo; est.textContent = nome;
   };
   const acoes = document.createElement("div");
   acoes.className = "citar-acoes";
@@ -502,10 +502,9 @@ function comoCitar(o) {
       baixaveis.map(([f, r, t]) => ({ rotulo: r, titulo: t, acao: () => baixar(o[f], o.chave, f) })), "baixar"));
   const copiar = document.createElement("button");
   copiar.type = "button"; copiar.textContent = "Copiar";
-  copiar.title = "Copia a referência no formato exibido (na ABNT, a data de acesso passa a ser a de hoje)";
+  copiar.title = "Copia a referência no formato exibido";
   copiar.onclick = async () => {
-    const bruto = ref.textContent.trim();
-    const txt = estilo === "ABNT" ? comAcessoHoje(bruto) : bruto;
+    const txt = ref.textContent.trim();
     let ok = false;
     try { await navigator.clipboard.writeText(txt); ok = true; }
     catch { ok = copiarPorSelecao(txt, acoes); }
