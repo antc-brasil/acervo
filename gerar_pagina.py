@@ -15,6 +15,8 @@ Uso:
 import json
 import re
 import sys
+import time
+import urllib.error
 import urllib.request
 from datetime import datetime
 from pathlib import Path
@@ -49,15 +51,31 @@ API = f"https://api.zotero.org/groups/{GROUP_ID}"
 AQUI = Path(__file__).resolve().parent
 
 
+# Esperas (s) entre tentativas quando a API do Zotero falha de forma passageira
+ESPERAS = (10, 30)
+
+
+def baixar_json(url: str):
+    """GET na API com nova tentativa em erro 5xx, 429 ou falha de rede."""
+    for espera in (*ESPERAS, None):
+        try:
+            req = urllib.request.Request(url, headers={"Zotero-API-Version": "3"})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return json.load(r), r.headers
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as e:
+            passageiro = not isinstance(e, urllib.error.HTTPError) or e.code >= 500 or e.code == 429
+            if espera is None or not passageiro:
+                raise
+            print(f"  API do Zotero falhou ({e}); nova tentativa em {espera}s", file=sys.stderr)
+            time.sleep(espera)
+
+
 def buscar_tudo(caminho: str, extra: str = "") -> list:
     saida = []
     start = 0
     while True:
-        url = f"{API}/{caminho}?format=json&limit=100&start={start}{extra}"
-        req = urllib.request.Request(url, headers={"Zotero-API-Version": "3"})
-        with urllib.request.urlopen(req, timeout=60) as r:
-            lote = json.load(r)
-            total = int(r.headers.get("Total-Results", "0"))
+        lote, cab = baixar_json(f"{API}/{caminho}?format=json&limit=100&start={start}{extra}")
+        total = int(cab.get("Total-Results", "0"))
         saida.extend(lote)
         if len(lote) < 100 or len(saida) >= total:
             return saida
@@ -65,10 +83,18 @@ def buscar_tudo(caminho: str, extra: str = "") -> list:
 
 
 def citacoes_extras() -> dict:
-    """{chave do item: {formato: bib}} para os formatos além do ABNT."""
+    """{chave do item: {formato: bib}} para os formatos além do ABNT.
+
+    Um formato que não vier fica de fora da cópia embutida; a página o busca
+    na API quando o visitante o escolher."""
     saida = {}
     for nome, estilo in ESTILOS_EXTRAS.items():
-        for i in buscar_tudo("items/top", f"&include=bib&style={estilo}&locale=pt-BR"):
+        try:
+            itens = buscar_tudo("items/top", f"&include=bib&style={estilo}&locale=pt-BR")
+        except (urllib.error.URLError, TimeoutError) as e:
+            print(f"  formato {nome} indisponível agora ({e}); segue sem ele", file=sys.stderr)
+            continue
+        for i in itens:
             saida.setdefault(i["key"], {})[nome] = i.get("bib", "")
     return saida
 
