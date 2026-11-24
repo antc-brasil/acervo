@@ -14,8 +14,8 @@ head = head.replace('</style>', '''  .previa { background: var(--ambar); color: 
   .sem-downloads .baixar { display: none; }
 </style>''', 1)
 banner = ('<div class="previa" role="note"><div class="conteudo"><strong>Prévia para visualização.</strong> '
-          'A página oficial está em <a href="https://acervo.antcbrasil.org.br/" target="_blank" rel="noopener" '
-          'style="color:inherit">acervo.antcbrasil.org.br</a>.</div></div>\n')
+          'A página oficial está em <a href="https://portfolio.antcbrasil.org.br/" target="_blank" rel="noopener" '
+          'style="color:inherit">portfolio.antcbrasil.org.br</a>.</div></div>\n')
 body = banner + body
 assert '"modo": "auto"' in body
 body = body.replace('"modo": "auto"', '"modo": "estatico"')

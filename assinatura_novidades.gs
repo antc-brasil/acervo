@@ -1,12 +1,12 @@
 /**
- * Avisos por e-mail de novos itens no Acervo ANTC.
+ * Avisos por e-mail de novos itens no Portfólio de Publicações dos Auditores de Controle Externo.
  *
- * - Formulário "Acervo ANTC — Receber novidades por e-mail" para cadastro (e-mail, nome, consentimento).
+ * - Formulário "Portfólio de Publicações — Receber novidades por e-mail" para cadastro (e-mail, nome, consentimento).
  * - Toda segunda-feira, às 8h, consulta o grupo do Zotero e envia aos inscritos um resumo dos
  *   itens ADICIONADOS desde a última verificação (edições de itens antigos não geram aviso).
  *   Semana sem novidade, nenhum e-mail sai.
  * - Cada e-mail traz um link de cancelamento de inscrição (app da Web deste mesmo projeto).
- * - O mesmo app da Web serve o feed RSS do acervo em URL_APP_WEB + '?feed=rss'
+ * - O mesmo app da Web serve o feed RSS do portfólio em URL_APP_WEB + '?feed=rss'
  *   (30 itens mais recentes, por data de inclusão). Depois de alterar o código, publique em
  *   Implantar > Gerenciar implantações > editar > Versão: Nova versão (a URL não muda).
  *
@@ -22,12 +22,12 @@
  */
 const GROUP_ID = 6584175;
 const ESTILO = 'associacao-brasileira-de-normas-tecnicas-ufrgs';
-// Página do acervo
+// Página do portfólio (passa a https://portfolio.antcbrasil.org.br/ quando o novo endereço estiver no ar)
 const PAGINA = 'https://acervo.antcbrasil.org.br/';
 // URL /exec da implantação "App da Web" deste projeto (passo 2)
 const URL_APP_WEB = 'https://script.google.com/macros/s/AKfycbwD40aP4oFWycKv4_uPhAHNTUs2RQ1MaS7i5Tb39ho4JJVHRZM-akvmHFhhgFiqSVxQ5Q/exec';
 const FUSO = 'America/Sao_Paulo';
-const REMETENTE = 'Acervo ANTC';
+const REMETENTE = 'Portfólio de Publicações · ANTC';
 // Endereço de envio: apelido (alias) da conta que executa o script, cadastrado no Gmail em
 // Configurações > Contas > "Enviar e-mail como". Enquanto não estiver lá, o e-mail sai do
 // endereço da própria conta (sem replyTo, para respostas não irem a um endereço inexistente).
@@ -45,16 +45,19 @@ const props = () => PropertiesService.getScriptProperties();
 
 // ======================= Instalação =======================
 
+const FORM_TITULO = 'Portfólio de Publicações — Receber novidades por e-mail';
+const FORM_DESCRICAO =
+  'Cadastre seu e-mail para receber um aviso semanal sempre que novos itens forem incluídos no ' +
+  'Portfólio de Publicações dos Auditores de Controle Externo, que reúne a produção bibliográfica da carreira. ' +
+  'Nas semanas sem novidades, nenhum e-mail é enviado. Você pode cancelar a inscrição a qualquer momento ' +
+  'pelo link presente em cada mensagem.';
+
 function configurar() {
   const p = props();
   if (p.getProperty('formId')) throw new Error('Já configurado. Para refazer, apague as propriedades do script.');
 
-  const form = FormApp.create('Acervo ANTC — Receber novidades por e-mail');
-  form.setDescription(
-    'Cadastre seu e-mail para receber um aviso semanal sempre que novos itens forem incluídos no ' +
-    'Acervo ANTC, que reúne a produção bibliográfica dos Auditores de Controle Externo. ' +
-    'Nas semanas sem novidades, nenhum e-mail é enviado. Você pode cancelar a inscrição a qualquer momento ' +
-    'pelo link presente em cada mensagem.');
+  const form = FormApp.create(FORM_TITULO);
+  form.setDescription(FORM_DESCRICAO);
   form.setCollectEmail(false);
   // Conta Google Workspace: sem isto, só usuários do domínio da ANTC conseguem responder
   form.setRequireLogin(false);
@@ -66,9 +69,9 @@ function configurar() {
       .setHelpText('Informe um e-mail válido.').build());
   form.addTextItem().setTitle('Nome (opcional)');
   form.addCheckboxItem().setTitle('Consentimento').setRequired(true)
-    .setChoiceValues(['Autorizo a ANTC a usar meu e-mail exclusivamente para o envio de novidades do Acervo ANTC.']);
+    .setChoiceValues(['Autorizo a ANTC a usar meu e-mail exclusivamente para o envio de novidades do Portfólio de Publicações.']);
 
-  const planilha = SpreadsheetApp.create('Acervo ANTC — Inscritos para novidades');
+  const planilha = SpreadsheetApp.create('Portfólio de Publicações — Inscritos para novidades');
   form.setDestination(FormApp.DestinationType.SPREADSHEET, planilha.getId());
   const aba = planilha.insertSheet('Inscritos', 0);
   aba.appendRow(['E-mail', 'Nome', 'Inscrito em', 'Situação', 'Cancelado em']);
@@ -99,6 +102,34 @@ function configurar() {
  * use depois de transferir o projeto para outra conta. Os gatilhos da conta anterior devem ser
  * apagados por ela, em Acionadores.
  */
+/** Aplica o nome atual ao formulário e à planilha já existentes (os links não mudam). */
+function atualizarNome() {
+  const p = props();
+  const form = FormApp.openById(p.getProperty('formId'));
+  form.setTitle(FORM_TITULO).setDescription(FORM_DESCRICAO);
+  renomearItens(form);
+  SpreadsheetApp.openById(p.getProperty('planilhaId')).rename('Portfólio de Publicações — Inscritos para novidades');
+  Logger.log('Formulário e planilha renomeados.');
+}
+
+/** Troca o nome antigo ("Acervo ANTC", "acervo") nos títulos, ajudas e opções das perguntas. */
+function renomearItens(form) {
+  const troca = t => String(t || '').replace(/Acervo ANTC/g, 'Portfólio de Publicações')
+    .replace(/\bAcervo\b/g, 'Portfólio').replace(/\bacervo\b/g, 'portfólio');
+  form.getItems().forEach(item => {
+    if (troca(item.getTitle()) !== item.getTitle()) item.setTitle(troca(item.getTitle()));
+    if (troca(item.getHelpText()) !== item.getHelpText()) item.setHelpText(troca(item.getHelpText()));
+    const tipo = item.getType();
+    const comOpcoes = tipo === FormApp.ItemType.CHECKBOX ? item.asCheckboxItem()
+      : tipo === FormApp.ItemType.MULTIPLE_CHOICE ? item.asMultipleChoiceItem()
+      : tipo === FormApp.ItemType.LIST ? item.asListItem() : null;
+    if (!comOpcoes) return;
+    const antes = comOpcoes.getChoices().map(c => c.getValue());
+    const depois = antes.map(troca);
+    if (depois.join('\n') !== antes.join('\n')) comOpcoes.setChoiceValues(depois);
+  });
+}
+
 function recriarGatilhos() {
   ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
   criarGatilhos(FormApp.openById(props().getProperty('formId')));
@@ -127,12 +158,12 @@ function aoCadastrar(e) {
   if (linha) aba.getRange(linha, 2, 1, 4).setValues([[nome, agora, 'Ativo', '']]);
   else aba.appendRow([email, nome, agora, 'Ativo', '']);
 
-  enviar(email, 'Inscrição confirmada — Acervo ANTC', moldura(
+  enviar(email, 'Inscrição confirmada — Portfólio de Publicações', moldura(
     `<p style="margin:0 0 12px">${nome ? 'Olá, ' + esc(nome) + '!' : 'Olá!'}</p>
-     <p style="margin:0 0 12px">Sua inscrição para receber as novidades do <strong>Acervo ANTC</strong> foi confirmada.
-     Toda segunda-feira em que houver novos itens no acervo, você receberá um resumo por e-mail.</p>
-     <p style="margin:0">${botao(PAGINA, 'Conhecer o acervo')}</p>`, email),
-    `Sua inscrição para receber as novidades do Acervo ANTC foi confirmada.\n\nAcervo: ${PAGINA}`);
+     <p style="margin:0 0 12px">Sua inscrição para receber as novidades do <strong>Portfólio de Publicações dos Auditores de Controle Externo</strong> foi confirmada.
+     Toda segunda-feira em que houver novos itens no portfólio, você receberá um resumo por e-mail.</p>
+     <p style="margin:0">${botao(PAGINA, 'Conhecer o portfólio')}</p>`, email),
+    `Sua inscrição para receber as novidades do Portfólio de Publicações foi confirmada.\n\nPortfólio: ${PAGINA}`);
 }
 
 function doGet(e) {
@@ -142,16 +173,16 @@ function doGet(e) {
   const valido = email && token === assinatura(email);
   // A confirmação exige um clique: filtros de e-mail que abrem links não cancelam a inscrição
   const html = valido
-    ? `<p>Cancelar o envio de novidades do Acervo ANTC para <strong>${esc(email)}</strong>?</p>
+    ? `<p>Cancelar o envio de novidades do Portfólio de Publicações para <strong>${esc(email)}</strong>?</p>
        <button id="b" onclick="this.disabled=true;google.script.run.withSuccessHandler(m=>{document.getElementById('m').textContent=m;this.hidden=true}).cancelarInscricao('${esc(email)}','${esc(token)}')">Cancelar inscrição</button>
        <p id="m"></p>`
-    : '<p>Link de cancelamento inválido. Use o link do e-mail mais recente do Acervo ANTC.</p>';
+    : '<p>Link de cancelamento inválido. Use o link do e-mail mais recente do Portfólio de Publicações.</p>';
   return HtmlService.createHtmlOutput(
     `<div style="font:16px/1.6 Lato,Arial,sans-serif;color:#252525;max-width:560px;margin:40px auto;padding:0 16px">
-     <h1 style="font-size:1.4rem;color:#28285b;text-transform:uppercase"><span style="color:#8a5f00">Acervo</span> ANTC</h1>
+     <h1 style="font-size:1.4rem;color:#28285b;text-transform:uppercase"><span style="color:#8a5f00">Portfólio</span> de Publicações</h1>
      ${html}
      <style>button{font:inherit;font-weight:700;background:#28285b;color:#fff;border:0;border-radius:999px;padding:10px 22px;cursor:pointer}</style>
-     </div>`).setTitle('Acervo ANTC — Cancelar inscrição');
+     </div>`).setTitle('Portfólio de Publicações — Cancelar inscrição');
 }
 
 function cancelarInscricao(email, token) {
@@ -159,7 +190,7 @@ function cancelarInscricao(email, token) {
   const aba = abaInscritos();
   const linha = localizar(aba, email);
   if (linha) aba.getRange(linha, 4, 1, 2).setValues([['Cancelado', new Date()]]);
-  return 'Inscrição cancelada. Você não receberá mais e-mails do Acervo ANTC.';
+  return 'Inscrição cancelada. Você não receberá mais e-mails do Portfólio de Publicações.';
 }
 
 // ======================= Feed RSS =======================
@@ -195,6 +226,7 @@ function montarFeed() {
     return ['    <item>',
       `      <title>${esc(d.title || 'Sem título')}</title>`,
       `      <link>${esc(link)}</link>`,
+      // Prefixo antigo mantido de propósito: trocar o guid faria os leitores de RSS repetirem todos os itens
       `      <guid isPermaLink="false">acervo-antc-${i.key}</guid>`,
       `      <pubDate>${new Date(d.dateAdded).toUTCString()}</pubDate>`,
       ...autores.map(a => `      <dc:creator>${esc(a)}</dc:creator>`),
@@ -206,10 +238,10 @@ function montarFeed() {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
-    <title>Acervo ANTC — Novidades</title>
+    <title>Portfólio de Publicações — Novidades</title>
     <link>${esc(PAGINA)}</link>
     <atom:link href="${esc(URL_APP_WEB + '?feed=rss')}" rel="self" type="application/rss+xml"/>
-    <description>Novos itens do Acervo ANTC: a produção bibliográfica dos Auditores de Controle Externo reunida em um só lugar.</description>
+    <description>Novos itens do Portfólio de Publicações dos Auditores de Controle Externo, reunidos pela ANTC.</description>
     <language>pt-BR</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <ttl>360</ttl>
@@ -254,7 +286,7 @@ function testarEnvio() {
 
 function enviarResumo(email, itens) {
   const n = itens.length;
-  const assunto = n === 1 ? 'Novo item no Acervo ANTC' : `${n} novos itens no Acervo ANTC`;
+  const assunto = n === 1 ? 'Novo item no Portfólio de Publicações' : `${n} novos itens no Portfólio de Publicações`;
   const blocos = itens.map(i => {
     const d = i.data;
     const link = d.DOI ? 'https://doi.org/' + d.DOI : d.url;
@@ -272,11 +304,11 @@ function enviarResumo(email, itens) {
     </td></tr>`;
   }).join('');
   const html = moldura(
-    `<p style="margin:0 0 4px">${n === 1 ? 'Um novo item foi incluído' : n + ' novos itens foram incluídos'} no Acervo ANTC:</p>
+    `<p style="margin:0 0 4px">${n === 1 ? 'Um novo item foi incluído' : n + ' novos itens foram incluídos'} no Portfólio de Publicações:</p>
      <table role="presentation" width="100%" cellspacing="0" cellpadding="0">${blocos}</table>
-     <p style="margin:16px 0 0">${botao(PAGINA, 'Ver o acervo completo')}</p>`, email);
+     <p style="margin:16px 0 0">${botao(PAGINA, 'Ver o portfólio completo')}</p>`, email);
   const texto = itens.map(i => `- ${i.data.title} (${tipo(i.data)}${ano(i) ? ', ' + ano(i) : ''})`).join('\n');
-  enviar(email, assunto, html, `${assunto}:\n\n${texto}\n\nAcervo: ${PAGINA}\nCancelar inscrição: ${linkCancelamento(email)}`);
+  enviar(email, assunto, html, `${assunto}:\n\n${texto}\n\nPortfólio: ${PAGINA}\nCancelar inscrição: ${linkCancelamento(email)}`);
 }
 
 // ======================= Apoio =======================
@@ -303,11 +335,12 @@ function moldura(conteudo, email) {
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;margin:0 auto;background:#fff;border:1px solid #e0e0ea;border-radius:10px;overflow:hidden">
     <tr><td style="background:#28285b;border-bottom:4px solid #f7ad03;padding:20px 24px">
       <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#c9c9e3">ANTC · Auditor forte, controle externo forte</div>
-      <div style="font-size:24px;font-weight:900;text-transform:uppercase;color:#fff"><span style="color:#f7ad03">Acervo</span> ANTC</div>
+      <div style="font-size:24px;font-weight:900;text-transform:uppercase;color:#fff"><span style="color:#f7ad03">Portfólio</span> de Publicações</div>
+      <div style="font-size:13px;font-weight:900;text-transform:uppercase;color:#fff;letter-spacing:.03em">dos Auditores de Controle Externo</div>
     </td></tr>
     <tr><td style="padding:20px 24px">${conteudo}</td></tr>
     <tr><td style="background:#f5f5f9;border-top:1px solid #e0e0ea;padding:14px 24px;font-size:12px;color:#5c5d72">
-      Você recebe este e-mail porque se inscreveu para receber as novidades do Acervo ANTC.
+      Você recebe este e-mail porque se inscreveu para receber as novidades do Portfólio de Publicações.
       <a href="${esc(linkCancelamento(email))}" style="color:#0b3d74">Cancelar inscrição</a>.
     </td></tr>
   </table></div>`;

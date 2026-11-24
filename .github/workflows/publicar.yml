@@ -1,6 +1,6 @@
-# Gera a página a partir do Zotero e publica no GitHub Pages (acervo.antcbrasil.org.br).
+# Gera a página a partir do Zotero e publica no GitHub Pages (portfolio.antcbrasil.org.br).
 # Em Settings > Pages, a origem ("Source") deve ser "GitHub Actions".
-name: Publicar acervo
+name: Publicar portfólio
 
 on:
   push:

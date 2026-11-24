@@ -3,7 +3,7 @@
 
 A página resultante é um arquivo único (HTML + CSS + JS inline; a fonte Lato do
 Google Fonts é opcional e cai para fontes do sistema se bloqueada), publicada no
-GitHub Pages em https://acervo.antcbrasil.org.br/ por .github/workflows/publicar.yml.
+GitHub Pages em https://portfolio.antcbrasil.org.br/ por .github/workflows/publicar.yml.
 Ela traz uma cópia dos dados embutida e, ao abrir, atualiza-se pela API do Zotero;
 se a consulta falhar, fica com a cópia.
 
@@ -35,7 +35,7 @@ CONFIG = {
     # Tags de controle interno que não devem aparecer como tema
     "tagsIgnoradas": ["lido", "a revisar", "a ler"],
     # Formulário Google de indicação de material (criado por formulario_indicacao.gs):
-    # usado pelo botão "Indicar material para o acervo" e pelo link "Sugira a inclusão" do rodapé
+    # usado pelo botão "Indicar material para o portfólio" e pelo link "Sugira a inclusão" do rodapé
     "linkSugestao": "https://docs.google.com/forms/d/e/1FAIpQLSf0FiBEJYjNNkqbzx_rdU-mSZHbHyH_qsfLBJQ1hIKZXNBizA/viewform",
     "linkIndicacao": "https://docs.google.com/forms/d/e/1FAIpQLSf0FiBEJYjNNkqbzx_rdU-mSZHbHyH_qsfLBJQ1hIKZXNBizA/viewform",
     # Formulário de cadastro para avisos de novos itens por e-mail (criado por assinatura_novidades.gs);
@@ -136,7 +136,7 @@ def main() -> None:
     # Descoberta automática do feed pelos leitores de RSS
     if CONFIG.get("linkFeed"):
         html = html.replace("</title>", '</title>\n<link rel="alternate" type="application/rss+xml" '
-                            f'title="Acervo ANTC — Novidades" href="{CONFIG["linkFeed"]}">', 1)
+                            f'title="Portfólio de Publicações — Novidades" href="{CONFIG["linkFeed"]}">', 1)
     destino.write_text(html, encoding="utf-8")
     # Aviso para a curadoria: obras sem Auditor(a) identificado no campo Extra
     padrao = re.compile(r"^[^:()]+?\s*\([^():]+\)$")

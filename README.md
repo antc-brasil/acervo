@@ -1,7 +1,8 @@
-# Acervo ANTC
+# Portfólio de Publicações dos Auditores de Controle Externo
 
-Catálogo público da produção bibliográfica de Auditores de Controle Externo,
-publicado em **https://acervo.antcbrasil.org.br/**.
+Catálogo público da produção bibliográfica de Auditores de Controle Externo, mantido pela ANTC
+(antes chamado Acervo ANTC), publicado em **https://portfolio.antcbrasil.org.br/**
+(o endereço antigo, acervo.antcbrasil.org.br, deve redirecionar para ele).
 
 - **Base de dados:** grupo público do Zotero [acervo_antc](https://www.zotero.org/groups/6584175) (id 6584175).
   A curadoria é feita só no Zotero; a página lê os dados de lá.
@@ -44,3 +45,18 @@ python3 gerar_previa.py acervo.html /tmp/acervo-previa.html   # versão para o A
 
 Situação em 14/10/2026: DNS criado pela Trídia, domínio verificado, *Custom domain* e HTTPS ativos,
 `PAGINA` trocada (app da Web versão 4). Falta só o botão no site da ANTC (passo 5).
+
+## Troca de nome para Portfólio de Publicações (nov/2026)
+
+Novo endereço `portfolio.antcbrasil.org.br`, já cadastrado para verificação na organização antc-brasil.
+Registros pedidos à Trídia:
+
+| Tipo  | Nome                                             | Valor                            |
+|-------|--------------------------------------------------|----------------------------------|
+| CNAME | `portfolio`                                      | `antc-brasil.github.io.`         |
+| TXT   | `_github-pages-challenge-antc-brasil.portfolio`  | `2ad31b033aefbed182e999f39cfc04` |
+
+Na virada: Verify → trocar o *Custom domain* para portfolio → Enforce HTTPS → colar os `.gs` novos
+no Apps Script (nova versão do app da Web) e renomear os formulários → Trídia cria o redirecionamento
+301 de `acervo.antcbrasil.org.br` para `portfolio.antcbrasil.org.br` na Cloudflare e troca o botão do site.
+

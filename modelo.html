@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Acervo ANTC</title>
-<meta name="description" content="Produção bibliográfica dos Auditores de Controle Externo dos Tribunais de Contas do Brasil, reunida pela ANTC.">
+<title>Portfólio de Publicações · ANTC</title>
+<meta name="description" content="Portfólio de Publicações dos Auditores de Controle Externo dos Tribunais de Contas do Brasil, reunido pela ANTC.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap">
 <style>
   /* Paleta da identidade visual da ANTC (antcbrasil.org.br) */
@@ -40,12 +40,14 @@
   /* Faixa de abertura, no marinho da barra de menu do site */
   .faixa { background: var(--marinho); color: #fff; border-bottom: 4px solid var(--ambar); }
   .faixa .conteudo { padding-block: 36px 32px; }
-  /* Volta ao site da ANTC (o acervo fica em subdomínio próprio) */
+  /* Volta ao site da ANTC (o portfólio fica em subdomínio próprio) */
   .voltar { display: inline-block; margin: -16px 0 18px; font-size: .88rem; color: #c9c9e3; text-decoration: none; }
   .voltar:hover, .voltar:focus-visible { color: #fff; text-decoration: underline; }
   .sobretitulo { margin: 0 0 10px; font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #c9c9e3; }
   .faixa h1 { margin: 0; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.1; font-weight: 900; text-transform: uppercase; letter-spacing: .01em; text-wrap: balance; }
   .faixa h1 span { color: var(--ambar); }
+  /* Complemento do nome em linha própria, como no Cadastro Nacional */
+  .faixa h1 small { display: block; font-size: .5em; font-weight: 900; color: #fff; letter-spacing: .03em; margin-top: 6px; }
   /* Chamada e nota no padrão do Cadastro Nacional (cadastro.antcbrasil.org.br) */
   .faixa .lead { margin: 18px 0 0; max-width: 760px; color: #fff; font-size: 1.05rem; font-weight: 700; }
   .faixa .nota { margin: 6px 0 0; max-width: 760px; color: #c9c9e3; font-size: .9rem; }
@@ -143,11 +145,11 @@
   <div class="conteudo">
     <a class="voltar" href="https://www.antcbrasil.org.br/">← Voltar ao site da ANTC</a>
     <p class="sobretitulo">ANTC · Auditor forte, controle externo forte</p>
-    <h1><span>Acervo</span> ANTC</h1>
+    <h1><span>Portfólio</span> de Publicações<small>dos Auditores de Controle Externo</small></h1>
     <p class="lead">A produção bibliográfica dos Auditores de Controle Externo reunida em um só lugar: livros, capítulos, artigos, teses, dissertações e outras publicações. O conhecimento gerado pela carreira ao seu alcance.</p>
     <p class="nota">As referências apontam para o local de publicação original. O acesso ao texto completo segue as condições de cada fonte, como editoras, periódicos, repositórios institucionais e portais de notícias.</p>
     <div class="acoes">
-      <a class="pilula cheia" id="lnk-indicar" href="#" target="_blank" rel="noopener">Indicar material para o acervo</a>
+      <a class="pilula cheia" id="lnk-indicar" href="#" target="_blank" rel="noopener">Indicar material para o portfólio</a>
       <a class="pilula contorno" id="lnk-novidades" href="#" target="_blank" rel="noopener" hidden>Receber novidades por e-mail</a>
     </div>
   </div>
@@ -182,7 +184,7 @@
   </div>
 
   <div class="secao">
-    <h2><span>Itens</span> do acervo</h2>
+    <h2><span>Itens</span> do portfólio</h2>
     <div class="status">
       <span id="contagem" aria-live="polite"></span>
       <button id="limpar" type="button" hidden>Limpar filtros</button>
@@ -768,7 +770,7 @@ async function iniciar() {
     carregar(items, cols.map(c => ({ key: c.key, name: c.data.name })));
   } catch (e) {
     /* Consulta bloqueada (ex.: política de segurança do site) ou indisponível: mantém a cópia embutida */
-    if (!snap) { $("lista").replaceChildren(); $("contagem").textContent = "Não foi possível carregar o acervo agora."; }
+    if (!snap) { $("lista").replaceChildren(); $("contagem").textContent = "Não foi possível carregar o portfólio agora."; }
   }
 }
 iniciar();
