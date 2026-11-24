@@ -23,7 +23,7 @@
 const GROUP_ID = 6584175;
 const ESTILO = 'associacao-brasileira-de-normas-tecnicas-ufrgs';
 // Página do portfólio (passa a https://portfolio.antcbrasil.org.br/ quando o novo endereço estiver no ar)
-const PAGINA = 'https://acervo.antcbrasil.org.br/';
+const PAGINA = 'https://portfolio.antcbrasil.org.br/';
 // URL /exec da implantação "App da Web" deste projeto (passo 2)
 const URL_APP_WEB = 'https://script.google.com/macros/s/AKfycbwD40aP4oFWycKv4_uPhAHNTUs2RQ1MaS7i5Tb39ho4JJVHRZM-akvmHFhhgFiqSVxQ5Q/exec';
 const FUSO = 'America/Sao_Paulo';
@@ -31,7 +31,7 @@ const REMETENTE = 'Portfólio de Publicações · ANTC';
 // Endereço de envio: apelido (alias) da conta que executa o script, cadastrado no Gmail em
 // Configurações > Contas > "Enviar e-mail como". Enquanto não estiver lá, o e-mail sai do
 // endereço da própria conta (sem replyTo, para respostas não irem a um endereço inexistente).
-const EMAIL_REMETENTE = 'acervo@antcbrasil.org.br';
+const EMAIL_REMETENTE = 'portfolio@antcbrasil.org.br';
 
 const TIPOS = {
   journalArticle: 'Artigo de periódico', book: 'Livro', bookSection: 'Capítulo de livro',

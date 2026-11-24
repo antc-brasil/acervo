@@ -60,3 +60,9 @@ Na virada: Verify → trocar o *Custom domain* para portfolio → Enforce HTTPS 
 no Apps Script (nova versão do app da Web) e renomear os formulários → Trídia cria o redirecionamento
 301 de `acervo.antcbrasil.org.br` para `portfolio.antcbrasil.org.br` na Cloudflare e troca o botão do site.
 
+Situação em 24/11/2026: registros criados pela Trídia, domínio portfolio verificado, *Custom domain*
+trocado para portfolio, `PAGINA` atualizada (app da Web versão 6) e URL do grupo no Zotero trocada.
+Conta acervo@ renomeada para portfolio@ (`EMAIL_REMETENTE` já ajustado no código). Faltam o redirecionamento 301 de
+acervo (proxy ligado no registro `acervo` + regra de redirecionamento) e o menu "Portfólio de Publicações"
+no site da ANTC, ambos com a Trídia.
+
