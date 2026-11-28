@@ -88,7 +88,7 @@ function criarFormulario() {
   form.addPageBreakItem().setTitle('4. Declarações');
   form.addCheckboxItem().setTitle('Declarações').setRequired(true)
     .setChoiceValues([
-      'As informações prestadas são verdadeiras.',
+      'Estou ciente de que o portfólio reúne somente publicações de autoria de Auditor(a) de Controle Externo que seja associado à ANTC.',
       'Estou ciente de que o portfólio publica apenas os dados bibliográficos e o link para a publicação original.',
       'Autorizo o uso do meu nome e e-mail pela ANTC exclusivamente para contato sobre esta indicação.'])
     .setValidation(FormApp.createCheckboxValidation().requireSelectExactly(3)

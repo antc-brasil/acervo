@@ -2,7 +2,7 @@
 
 Catálogo público da produção bibliográfica de Auditores de Controle Externo, mantido pela ANTC
 (antes chamado Acervo ANTC), publicado em **https://portfolio.antcbrasil.org.br/**
-(o endereço antigo, acervo.antcbrasil.org.br, deve redirecionar para ele).
+(o endereço antigo, acervo.antcbrasil.org.br, foi desativado sem redirecionamento).
 
 - **Base de dados:** grupo público do Zotero [acervo_antc](https://www.zotero.org/groups/6584175) (id 6584175).
   A curadoria é feita só no Zotero; a página lê os dados de lá.
@@ -63,7 +63,8 @@ no Apps Script (nova versão do app da Web) e renomear os formulários → Tríd
 Situação em 24/11/2026: registros criados pela Trídia, domínio portfolio verificado, *Custom domain*
 trocado para portfolio, `PAGINA` atualizada (app da Web versão 6) e URL do grupo no Zotero trocada.
 Conta acervo@ renomeada para portfolio@; em 28/11, remetente portfolio@ e app da Web versão 7 implantada
-por portfolio@ (gatilhos da conta seguem ativos, sem erros). Faltam o redirecionamento 301 de
-acervo (proxy ligado no registro `acervo` + regra de redirecionamento) e o menu "Portfólio de Publicações"
-no site da ANTC, ambos com a Trídia.
+por portfolio@ (gatilhos da conta seguem ativos, sem erros). Menu do site da ANTC
+aponta para portfolio. Decidido não redirecionar acervo.antcbrasil.org.br (responde 404); o domínio
+acervo segue verificado na organização do GitHub, o que impede outro repositório de usá-lo enquanto o
+registro CNAME `acervo` existir.
 
