@@ -62,7 +62,8 @@ no Apps Script (nova versão do app da Web) e renomear os formulários → Tríd
 
 Situação em 24/11/2026: registros criados pela Trídia, domínio portfolio verificado, *Custom domain*
 trocado para portfolio, `PAGINA` atualizada (app da Web versão 6) e URL do grupo no Zotero trocada.
-Conta acervo@ renomeada para portfolio@ (`EMAIL_REMETENTE` já ajustado no código). Faltam o redirecionamento 301 de
+Conta acervo@ renomeada para portfolio@; em 28/11, remetente portfolio@ e app da Web versão 7 implantada
+por portfolio@ (gatilhos da conta seguem ativos, sem erros). Faltam o redirecionamento 301 de
 acervo (proxy ligado no registro `acervo` + regra de redirecionamento) e o menu "Portfólio de Publicações"
 no site da ANTC, ambos com a Trídia.
 
